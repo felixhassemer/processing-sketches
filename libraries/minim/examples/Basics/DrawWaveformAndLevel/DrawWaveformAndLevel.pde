@@ -1,6 +1,6 @@
 /**
-  * This sketch demonstrates how to use the AudioBuffer objects of an AudioPlayer 
-  * to draw the waveform and level of the sound as it is playing. These same 
+  * This sketch demonstrates how to use the AudioBuffer objects of an AudioPlayer
+  * to draw the waveform and level of the sound as it is playing. These same
   * AudioBuffer objects are available on AudioInput, AudioOuput, and AudioSample,
   * so they same drawing code will work in those cases.
   *
@@ -23,9 +23,9 @@ void setup()
 void draw()
 {
   background(0);
-  
+
   stroke( 255 );
-  
+
   // draw the waveforms
   // the values returned by left.get() and right.get() will be between -1 and 1,
   // so we need to scale them up to see the waveform
@@ -37,11 +37,11 @@ void draw()
     line( x1, 50 + groove.left.get(i)*50, x2, 50 + groove.left.get(i+1)*50 );
     line( x1, 150 + groove.right.get(i)*50, x2, 150 + groove.right.get(i+1)*50 );
   }
-  
+
   noStroke();
   fill( 255, 128 );
-  
-  // the value returned by the level method is the RMS (root-mean-square) 
+
+  // the value returned by the level method is the RMS (root-mean-square)
   // value of the current buffer of audio.
   // see: http://en.wikipedia.org/wiki/Root_mean_square
   rect( 0, 0, groove.left.level()*width, 100 );
