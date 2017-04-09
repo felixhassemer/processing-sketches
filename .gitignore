@@ -4,3 +4,6 @@ build/
 *.pdf
 Thumbs.db
 libraries/
+templates/
+modes/
+examples/
