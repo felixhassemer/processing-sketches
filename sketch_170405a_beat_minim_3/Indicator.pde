@@ -5,7 +5,6 @@ class Indicator {
   float[] normArray;
   int low, high, bandThreshold;
   float sensitivity;
-  int offTime;
 
   // CONSTRUCTOR
   ///////////////////////////////////////////////////////////
@@ -15,6 +14,7 @@ class Indicator {
     diameter = tempDiam;
     onC = tempOnC;
     offC = tempOffC;
+    hasFinished = true;
   }
 
   // METHODS
@@ -28,10 +28,9 @@ class Indicator {
 
   // check if enough bands in the range are loud enough
   // and set the color accordingly
-  void isBeat(FFT tempfft, float tempSensitivity, int tempOffTime) {
+  void isBeat(FFT tempfft, float tempSensitivity) {
     fft = tempfft;
     sensitivity = tempSensitivity;
-    offTime = tempOffTime;
 
     // create float Array for average amplitudes
     normArray = new float[fft.avgSize()];
@@ -45,7 +44,7 @@ class Indicator {
         count++;
       }
       // break if enough bands go above threshold
-      if (count == bandThreshold) {
+      if (count >= bandThreshold) {
         col = onC;
         break;
       } else {

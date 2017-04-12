@@ -4,17 +4,18 @@ import ddf.minim.analysis.*;
 
 Minim minim;
 AudioInput source;
-FFT fftFull;
-FFT fftLin;
 FFT fftLog;
 WindowFunction myWindow = FFT.NONE;
+LogGraph log;
 
-Indicator rangeLow;
-Indicator rangeMid;
+Indicator bassRange;
+Indicator midRange;
+Indicator trebleRange;
 
-color bgndC = color(0);
-color graphC = color(255);
-color graphR1 = color(0, 200, 0);
+color cBgnd = color(0);
+color cGraph = color(255);
+color cBandRange = color(0, 200, 0);
+color cActiveBand = color(255, 0, 0);
 
 
 void setup() {
@@ -22,53 +23,87 @@ void setup() {
 
   minim = new Minim(this);
   source = minim.getLineIn(Minim.STEREO, 1024);
-  fftFull = new FFT(source.bufferSize(), source.sampleRate());
-  fftLin = new FFT(source.bufferSize(), source.sampleRate());
   fftLog = new FFT(source.bufferSize(), source.sampleRate());
-  rangeLow = new Indicator(width/2, height/2, 50, color(60), color(255));
-  rangeMid = new Indicator(width/3, height/2, 50, color(60), color(255));
+  bassRange = new Indicator(width/3, height/2, 80, color(128), color(255));
+  midRange = new Indicator(width/2, height/2, 50, color(80), color(255));
+  trebleRange = new Indicator(2*width/3, height/2, 25, color(30), color(255));
 
-  fftFull.window(myWindow);
-  fftLin.window(myWindow);
+  log = new LogGraph(fftLog);
+
   fftLog.window(myWindow);
-  fftLin.linAverages(60);
   fftLog.logAverages(120,12);
+
+  log.setPosition(0, height);
+  log.setSize(width, height);
 }
 
 void draw() {
-  background(0);
+  background(cBgnd);
 
-  // fullGraph(height/3, height/3);
+  fftLog.forward(source.mix);
 
-  // linGraph(2*height/3, height/3);
-  stroke(255);
-  logGraph(height, height);
   noStroke();
-  rangeLow.setRange(2, 6, 3);
-  rangeLow.isBeat(fftLog, 0.3, 500);
-  rangeLow.display();
+  bassRange.setRange(0, 6, 4);
+  bassRange.isBeat(fftLog, 0.3);
+  bassRange.display();
 
-  rangeMid.setRange(9, 13, 3);
-  rangeMid.isBeat(fftLog, 0.2, 500);
-  rangeMid.display();
+  midRange.setRange(9, 16, 3);
+  midRange.isBeat(fftLog, 0.22);
+  midRange.display();
+
+  trebleRange.setRange(20, 26, 2);
+  trebleRange.isBeat(fftLog, 0.1);
+  trebleRange.display();
+
+  log.display(bassRange);
+  log.display(midRange);
+  log.display(trebleRange);
 }
 
-// Graph for logarithm average FFT
-void logGraph(int tempY, int scaleFactor) {
-  fftLog.forward(source.mix);
-  noFill();
-  float w = float(width)/fftLog.avgSize();
-  for (int i=0; i < fftLog.avgSize(); i++) {
-    float h = scaleFactor * map(fftLog.getAvg(i), 0, 600, 0, 1);
-    if ((i >= rangeLow.low) && (i <= rangeLow.high)) {
-      fill(graphR1);
-      noStroke();
-      rect(i*w, height-height*rangeLow.sensitivity, w, 10);
-    } else {
-      noFill();
-      stroke(graphC);
-      line(0, height-height*rangeLow.sensitivity, width, height-height*rangeLow.sensitivity);
-    }
-    rect(i*w, tempY, w, -h);
-  }
+// void keyReleased()
+// {
+//   if ( key == '1' )
+//   {
+//     myWindow = FFT.BARTLETT;
+//   }
+//   else if ( key == '2' )
+//   {
+//     myWindow = FFT.BARTLETTHANN;
+//   }
+//   else if ( key == '3' )
+//   {
+//     myWindow = FFT.BLACKMAN;
+//   }
+//   else if ( key == '4' )
+//   {
+//     myWindow = FFT.COSINE;
+//   }
+//   else if ( key == '5' )
+//   {
+//     myWindow = FFT.GAUSS;
+//   }
+//   else if ( key == '6' )
+//   {
+//     myWindow = FFT.HAMMING;
+//   }
+//   else if ( key == '7' )
+//   {
+//     myWindow = FFT.HANN;
+//   }
+//   else if ( key == '8' )
+//   {
+//     myWindow = FFT.LANCZOS;
+//   }
+//   else if ( key == '9' )
+//   {
+//     myWindow = FFT.TRIANGULAR;
+//   }
+//
+//   fftLog.window( myWindow );
+// }
+
+void stop() {
+  source.close();
+  minim.stop();
+  super.stop();
 }
