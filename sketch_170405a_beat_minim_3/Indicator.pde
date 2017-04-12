@@ -54,6 +54,7 @@ class Indicator {
     }
   }
 
+  void logGraph(int tempY, int scaleFactor) {}
   // draw the dot and set fill color
   void display() {
     fill(col);
