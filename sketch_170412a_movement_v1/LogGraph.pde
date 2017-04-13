@@ -6,11 +6,14 @@ class LogGraph {
   float maxAmp;
   FFT fft;
   Indicator indicator;
+  color cGraph, cBandRange, cActiveBand;
 
-  LogGraph(FFT fftTemp) {
+  LogGraph(FFT fftTemp, color tempCGraph, color tempCBandRange, color tempCActiveBand) {
     fft = fftTemp;
-    amps = new float[512];
     maxAmp = 600;
+    cGraph = tempCGraph;
+    cBandRange = tempCBandRange;
+    cActiveBand = tempCActiveBand;
   }
 
   void setSize(int tempW, int tempScale) {
@@ -26,13 +29,14 @@ class LogGraph {
 
   void display(Indicator tIndicator) {
     indicator = tIndicator;
+    amps = new float[fft.avgSize()];
 
     low = indicator.low;
     high = indicator.high;
 
     for (int i=0; i < fft.avgSize(); i++) {
       amps[i] = fft.getAvg(i);
-      float avg = map(fft.getAvg(i), 0, maxAmp, 0, 1);
+      float avg = norm(fft.getAvg(i), 0, maxAmp);
       h = scaleFactor * avg;
       float lnH = y - (scaleFactor*indicator.sensitivity);
 
@@ -44,12 +48,13 @@ class LogGraph {
           fill(cBandRange);
         }
         // draw rects width on indicator line
-        noStroke();
         rect(i*w, lnH, w, 5);
       } else {
         noFill();
-        stroke(cGraph);
+        stroke(255);
         line(0, lnH, fullWidth, lnH);
+        stroke(cBgnd);
+        fill(cGraph);
       }
       rect(i*w, y, w, -h);
     }

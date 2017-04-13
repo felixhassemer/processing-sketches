@@ -6,6 +6,11 @@ class Indicator {
   int low, high, bandThreshold;
   float sensitivity;
 
+  // Amplitude variables
+  float[] amps;
+  float maxAmp;
+
+  // Timer and Counter variables
   boolean hasFinished;
   boolean beat;
   int startTime;
@@ -21,6 +26,7 @@ class Indicator {
     onC = tempOnC;
     offC = tempOffC;
     beatCount = 0;
+    maxAmp = 600;
   }
 
   // METHODS
@@ -38,6 +44,8 @@ class Indicator {
     fft = tempfft;
     sensitivity = tempSensitivity;
     offTime = tempOffTime;
+    normArray = new float[fft.avgSize()];
+    amps = new float[fft.avgSize()];
 
     // reset beat counter after 4 bars
     if (beatCount > 16) {
@@ -51,17 +59,21 @@ class Indicator {
       hasFinished = false;
     }
 
-    // create float Array for average amplitudes
-    normArray = new float[fft.avgSize()];
+    // store amplitudes in arrays
     for (int i=0; i < fft.avgSize(); i++) {
-      normArray[i] = norm(fft.getAvg(i), 0, 600);
+      // store average amplitudes in array
+      amps[i] = fft.getAvg(i);
+      // store normalized values in array
+      normArray[i] = norm(fft.getAvg(i), 0, maxAmp);
     }
+
     // check if threshold is passed
     int count = 0;
     for (int j=low; j < high; j++) {
       if (normArray[j] > sensitivity) {
         count++;
       }
+
       // break if enough bands go above threshold
       if (hasFinished) {
         if (count >= bandThreshold) {
@@ -77,6 +89,11 @@ class Indicator {
     }
     if (!beat) {
       col = offC;
+    }
+    if (maxAmp > max(amps)) {
+      maxAmp -= 0.1;
+    } else {
+      maxAmp = max(amps);
     }
   }
 
