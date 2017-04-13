@@ -51,8 +51,8 @@ class Indicator {
     amps = new float[fft.avgSize()];
 
     // reset beat counter after 4 bars
-    if (beatCount > 16) {
-      beatCount = 1;
+    if (beatCount > 15) {
+      beatCount = 0;
     }
 
     // allow beat detection if timer has finished

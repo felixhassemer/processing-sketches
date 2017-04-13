@@ -27,6 +27,8 @@ color[] colors;
 color cBgnd = color(0);
 
 int[] triCenter = new int[2];
+// ANIMATION variables
+MovingLine[] lines = new MovingLine[512];
 
 /////////////////////////////  SETUP  ///////////////////////////////////
 void setup() {
@@ -73,7 +75,6 @@ void setup() {
   log.setSize(width/3, height-width/3);
 }
 
-
 /////////////////////////////  DRAW  ///////////////////////////////////
 void draw() {
   background(cBgnd);
@@ -100,6 +101,14 @@ void draw() {
 
   // space for animations
   // ----------------------------------------------------------------------
+  if (bassRange.beat) {
+    lines[bassRange.beatCount] = new MovingLine(bassRange, 500, color(255), 2.0, 2.0);
+  }
+  for (int i=0; i =< bassRange.beatCount; i++) {
+    lines[i].move();
+    lines[i].display();
+
+  }
 
 
   if (midRange.beat) {
@@ -133,18 +142,26 @@ class MovingLine {
   float sWeight;
   color cStroke;
   float incr;
+  float scale;
   Indicator indicator;
+  boolean moving;
+  float max;
 
-  MovingLine(color _cStroke, float _sWeight, float _incr, Indicator _indicator) {
+  MovingLine(Indicator _indicator, float _scale, color _cStroke, float _sWeight, float _incr) {
     cStroke = _cStroke;
     sWeight = _sWeight;
     incr = _incr;
+    scale = _scale;
     indicator = _indicator;
+    max = indicator.beatSize;
     y = 0;
+    moving = true;
   }
 
   void move() {
-    y += incr;
+    if (y < max*scale) {
+      y += incr;
+    }
   }
 
   void display() {
