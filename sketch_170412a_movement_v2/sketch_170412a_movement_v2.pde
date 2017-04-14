@@ -15,9 +15,12 @@ WindowFunction myWindow = FFT.NONE;
 LogGraph log;
 
 // INDICATORS
-Indicator bassRange;
-Indicator midRange;
-Indicator trebleRange;
+Indicator bassRange;       Indicator midRange;   Indicator trebleRange;
+
+// Indicator settings
+float bassSense = 0.5;     int bassLowT = 1;     int bassHighT = 6;    int bassThresh = 2;
+float midSense = 0.25;     int midLowT = 9;      int midHighT = 13;    int midThresh = 4;
+float trebleSense = 0.15;  int trebleLowT = 15;  int trebleHighT = 25; int trebleThresh = 4;
 
 // SPOUT variables
 int nSenders = 3;
@@ -26,9 +29,9 @@ Spout[] senders;
 
 // MIDI bus
 MidiBus bus;
-float[] cc = new float[10];
-boolean[] pads = new boolean[50];
-boolean[] keys = new boolean[128];
+float[] cc =      new float[10];
+boolean[] pads =  new boolean[50];
+boolean[] keys =  new boolean[128];
 
 // COLOR variables
 color cBgnd = color(0);
@@ -39,7 +42,9 @@ int[] triCenter = new int[2];
 float x1 = -300;
 // Triangle[] triangles;
 ArrayList<Triangle> triangles;
+ArrayList<Circle> circles;
 boolean colorToggle = true;
+boolean colorToggleCircle = true;
 
 /////////////////////////////  SETUP  ///////////////////////////////////
 void setup() {
@@ -61,13 +66,13 @@ void setup() {
   }
 
   // set up Minim and Audio In
-  minim = new Minim(this);
-  source = minim.getLineIn(Minim.STEREO, 1024);
-  fftLog = new FFT(source.bufferSize(), source.sampleRate());
-  bassRange = new Indicator(width/3 + 100, 700, 150, color(128), color(255));
-  midRange = new Indicator(bassRange.x + bassRange.diameter/2, 700, 100, color(80), color(255));
+  minim =       new Minim(this);
+  source =      minim.getLineIn(Minim.STEREO, 1024);
+  fftLog =      new FFT(source.bufferSize(), source.sampleRate());
+  bassRange =   new Indicator(width/3 + 100, 700, 150, color(128), color(255));
+  midRange =    new Indicator(bassRange.x + bassRange.diameter/2, 700, 100, color(80), color(255));
   trebleRange = new Indicator(midRange.x + midRange.diameter/2, 700, 50, color(30), color(255));
-  log = new LogGraph(fftLog, color(128), color(0, 200, 0), color(200, 0, 0));
+  log =         new LogGraph(fftLog, color(128), color(0, 200, 0), color(200, 0, 0));
 
   // List all Midi devices
   MidiBus.list();
@@ -78,6 +83,7 @@ void setup() {
 
   // animation objects
   triangles = new ArrayList<Triangle>();
+  circles = new ArrayList<Circle>();
 
   // calculate centroids to translate to
   triCenter = centroid(0, canvas[0].height,
@@ -97,6 +103,9 @@ void setup() {
 /////////////////////////////  DRAW  ///////////////////////////////////
 void draw() {
   background(cBgnd);
+
+  // check midi signals
+  midiControl();
 
   // forward source to fft
   fftLog.forward(source.mix);
@@ -120,6 +129,7 @@ void draw() {
   // space for animations
   // ----------------------------------------------------------------------
 
+  circleZoom();
   triangleZoom();
 
   moveLine(1, bassRange);
@@ -166,6 +176,27 @@ void triangleZoom() {
   }
 }
 
+void circleZoom() {
+  for (int i=0; i < circles.size(); i++) {
+    Circle c = circles.get(i);
+    if (c.ani.isEnded()) {
+      circles.remove(i);
+    }
+  }
+
+  if (bassRange.beat) {
+    circles.add(new Circle(0, 0, 1, 2));
+    int current = circles.size()-1;
+    circles.get(current).flipColor(colorToggleCircle);
+    colorToggleCircle = !colorToggleCircle;
+    circles.get(current).grow();
+  }
+
+  for (Circle c : circles) {
+    c.display();
+  }
+}
+
 void moveLine(int _canv, Indicator _range) {
   if (_range.beatCount % 4 == 0) {
     float rotation;
@@ -182,6 +213,43 @@ void moveLine(int _canv, Indicator _range) {
   canvas[_canv].strokeWeight(10);
   canvas[_canv].stroke(255);
   canvas[_canv].line(x1, -height/2, x1, height/2);
+}
+
+/////////////////////////////  MIDI CONTROLS  ////////////////////////////////////
+
+void midiControl() {
+  // change range parameters by pressing pad + knobs
+  if (pads[40]) {                                         // pad 5
+    bassLowT = int(map(cc[1], 0, 1, 0, 10));                          // knob 5
+    bassHighT = int(map(cc[2], 0, 1, 6, 16));                         // knob 6
+    bassThresh = int(map(cc[3], 0, 1, 1, bassHighT-bassLowT));        // knob 7
+    bassSense = cc[4];                                                // knob 8
+    println("-----------------------------------------");
+    println("bass low threshold: " + bassLowT);
+    println("bass high threshold: " + bassHighT);
+    println("bass threshold: " + bassThresh);
+    println("sensitivity: " + bassSense);
+  } else if (pads[41]) {                                  // pad 6
+    midLowT = int(map(cc[1], 0, 1, 8, 16));                           // knob 5
+    midHighT = int(map(cc[2], 0, 1, 12, 22));                         // knob 6
+    midThresh = int(map(cc[3], 0, 1, 1, midHighT-midLowT));           // knob 7
+    midSense = cc[4];                                                 // knob 8
+    println("-----------------------------------------");
+    println("mid low threshold: " + midLowT);
+    println("mid high threshold: " + midHighT);
+    println("mid threshold: " + midThresh);
+    println("sensitivity: " + midSense);
+  } else if (pads[42]) {                                   // pad 7
+    trebleLowT = int(map(cc[1], 0, 1, 16, 26));                       // knob 5
+    trebleHighT = int(map(cc[2], 0, 1, 20, 30));                      // knob 6
+    trebleThresh = int(map(cc[3], 0, 1, 1, trebleHighT-trebleLowT));  // knob 7
+    trebleSense = cc[4];                                              // knob 8
+    println("-----------------------------------------");
+    println("treble low threshold: " + trebleLowT);
+    println("treble high threshold: " + trebleHighT);
+    println("treble threshold: " + trebleThresh);
+    println("sensitivity: " + trebleSense);
+  }
 }
 
 /////////////////////////////  CORE FUNCTIONS  ///////////////////////////////////
@@ -203,16 +271,16 @@ int[] midPoint(int x1, int y1, int x2, int y2) {
 }
 
 void detection() {
-  bassRange.setRange(0, 6, 3);
-  bassRange.isBeat(fftLog, 0.45, 200);
+  bassRange.setRange(bassLowT, bassHighT, bassThresh);
+  bassRange.isBeat(fftLog, bassSense, 200);
   bassRange.display();
 
-  midRange.setRange(9, 16, 4);
-  midRange.isBeat(fftLog, 0.25, 100);
+  midRange.setRange(midLowT, midHighT, midThresh);
+  midRange.isBeat(fftLog, midSense, 100);
   midRange.display();
 
-  trebleRange.setRange(20, 26, 2);
-  trebleRange.isBeat(fftLog, 0.1, 100);
+  trebleRange.setRange(trebleLowT, trebleHighT, trebleThresh);
+  trebleRange.isBeat(fftLog, trebleSense, 100);
   trebleRange.display();
 }
 
@@ -256,12 +324,12 @@ void triangleOutlines(color triColor) {
 // MIDI functions
 void noteOn(int channel, int pitch, int velocity) {
   // Receive a noteOn
-  println();
-  println("--------");
-  println("Note On:");
-  println("Channel:"+channel);
-  println("Pitch:"+pitch);
-  println("Velocity:"+velocity);
+  // println();
+  // println("--------");
+  // println("Note On:");
+  // println("Channel:"+channel);
+  // println("Pitch:"+pitch);
+  // println("Velocity:"+velocity);
 
   // put true in array if pad is pressed
   if (channel == 9) {
@@ -276,12 +344,12 @@ void noteOn(int channel, int pitch, int velocity) {
 
 void noteOff(int channel, int pitch, int velocity) {
   // Receive a noteOff
-  println();
-  println("--------");
-  println("Note Off:");
-  println("Channel:"+channel);
-  println("Pitch:"+pitch);
-  println("Velocity:"+velocity);
+  // println();
+  // println("--------");
+  // println("Note Off:");
+  // println("Channel:"+channel);
+  // println("Pitch:"+pitch);
+  // println("Velocity:"+velocity);
 
   // put true in boolean array if pad is pressed
   if (channel == 9) {
@@ -296,16 +364,15 @@ void noteOff(int channel, int pitch, int velocity) {
 
 void controllerChange(int channel, int number, int value) {
   // Receive a controllerChange
-  println();
-  println("--------");
-  println("Controller Change:");
-  println("Channel:"+channel);
-  println("Number:"+number);
-  println("Value:"+value);
+  // println();
+  // println("--------");
+  // println("Controller Change:");
+  // println("Channel:"+channel);
+  // println("Number:"+number);
+  // println("Value:"+value);
 
   // put all normalized values in cc array
   cc[number] = norm(value, 0, 127);
-  println(cc);
 }
 
 // close minim and midibus
