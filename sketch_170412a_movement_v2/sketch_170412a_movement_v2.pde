@@ -3,6 +3,7 @@ import spout.*;
 import ddf.minim.*;
 import ddf.minim.analysis.*;
 import de.looksgood.ani.*;
+import themidibus.*;
 
 // MINIM variables
 Minim minim;
@@ -22,6 +23,12 @@ Indicator trebleRange;
 int nSenders = 3;
 PGraphics[] canvas;
 Spout[] senders;
+
+// MIDI bus
+MidiBus bus;
+float[] cc = new float[10];
+boolean[] pads = new boolean[50];
+boolean[] keys = new boolean[128];
 
 // COLOR variables
 color cBgnd = color(0);
@@ -61,6 +68,10 @@ void setup() {
   midRange = new Indicator(bassRange.x + bassRange.diameter/2, 700, 100, color(80), color(255));
   trebleRange = new Indicator(midRange.x + midRange.diameter/2, 700, 50, color(30), color(255));
   log = new LogGraph(fftLog, color(128), color(0, 200, 0), color(200, 0, 0));
+
+  // List all Midi devices
+  MidiBus.list();
+  bus = new MidiBus(this, 0, 5);
 
   // initialize Ani
   Ani.init(this);
@@ -240,4 +251,67 @@ void triangleOutlines(color triColor) {
                       canvas[i].width/2, 1,
                       canvas[i].width, canvas[i].height-1);
   }
+}
+
+// MIDI functions
+void noteOn(int channel, int pitch, int velocity) {
+  // Receive a noteOn
+  println();
+  println("--------");
+  println("Note On:");
+  println("Channel:"+channel);
+  println("Pitch:"+pitch);
+  println("Velocity:"+velocity);
+
+  // put true in array if pad is pressed
+  if (channel == 9) {
+    pads[pitch] = true;
+  }
+
+  // put true in array if key is pressed
+  if (channel == 0) {
+    keys[pitch] = true;
+  }
+}
+
+void noteOff(int channel, int pitch, int velocity) {
+  // Receive a noteOff
+  println();
+  println("--------");
+  println("Note Off:");
+  println("Channel:"+channel);
+  println("Pitch:"+pitch);
+  println("Velocity:"+velocity);
+
+  // put true in boolean array if pad is pressed
+  if (channel == 9) {
+    pads[pitch] = false;
+  }
+
+  // put true in array if key is pressed
+  if (channel == 0) {
+    keys[pitch] = true;
+  }
+}
+
+void controllerChange(int channel, int number, int value) {
+  // Receive a controllerChange
+  println();
+  println("--------");
+  println("Controller Change:");
+  println("Channel:"+channel);
+  println("Number:"+number);
+  println("Value:"+value);
+
+  // put all normalized values in cc array
+  cc[number] = norm(value, 0, 127);
+  println(cc);
+}
+
+// close minim and midibus
+void stop() {
+  source.close();
+  minim.stop();
+  bus.dispose();
+  super.stop();
 }
