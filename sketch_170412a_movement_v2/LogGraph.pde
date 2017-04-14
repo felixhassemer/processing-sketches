@@ -13,7 +13,7 @@ class LogGraph {
   // CONSTRUCTOR
   LogGraph(FFT fftTemp, color tempCGraph, color tempCBandRange, color tempCActiveBand) {
     fft = fftTemp;
-    maxAmp = 600;
+    maxAmp = 400;
     cGraph = tempCGraph;
     cBandRange = tempCBandRange;
     cActiveBand = tempCActiveBand;

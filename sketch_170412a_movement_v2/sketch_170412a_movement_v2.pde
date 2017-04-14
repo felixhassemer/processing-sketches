@@ -2,6 +2,7 @@
 import spout.*;
 import ddf.minim.*;
 import ddf.minim.analysis.*;
+import de.looksgood.ani.*;
 
 // MINIM variables
 Minim minim;
@@ -21,14 +22,17 @@ Indicator trebleRange;
 int nSenders = 3;
 PGraphics[] canvas;
 Spout[] senders;
-color[] colors;
 
 // COLOR variables
 color cBgnd = color(0);
 
 int[] triCenter = new int[2];
+
 // ANIMATION variables
-MovingLine[] lines = new MovingLine[512];
+float x1 = -300;
+// Triangle[] triangles;
+ArrayList<Triangle> triangles;
+boolean colorToggle = true;
 
 /////////////////////////////  SETUP  ///////////////////////////////////
 void setup() {
@@ -58,7 +62,11 @@ void setup() {
   trebleRange = new Indicator(midRange.x + midRange.diameter/2, 700, 50, color(30), color(255));
   log = new LogGraph(fftLog, color(128), color(0, 200, 0), color(200, 0, 0));
 
+  // initialize Ani
+  Ani.init(this);
 
+  // animation objects
+  triangles = new ArrayList<Triangle>();
 
   // calculate centroids to translate to
   triCenter = centroid(0, canvas[0].height,
@@ -92,84 +100,77 @@ void draw() {
   log.display(midRange);
   log.display(trebleRange);
 
-  // start drawing on senders and draw triangle outline
+  // start drawing on senders
   senderDraw();
-  triangleOutlines(color(255));
 
   // translate to the centroids instead of canvas center
   senderTranslate();
 
   // space for animations
   // ----------------------------------------------------------------------
-  if (bassRange.beat) {
-    lines[bassRange.beatCount] = new MovingLine(bassRange, 500, color(255), 2.0, 2.0);
-  }
-  for (int i=0; i =< bassRange.beatCount; i++) {
-    lines[i].move();
-    lines[i].display();
 
-  }
+  triangleZoom();
 
+  moveLine(1, bassRange);
 
-  if (midRange.beat) {
-    canvas[1].fill(255);
-    canvas[1].noStroke();
-    canvas[1].rect(-width/2, -height/2, width, height);
-  }
-
-  if (trebleRange.beat) {
-    canvas[2].fill(255);
-    canvas[2].noStroke();
-    canvas[2].rect(-width/2, -height/2, width, height);
-  }
-
-
-
-
-
-
+  flashColor(0, bassRange, color(255));
+  flashColor(1, midRange, color(255));
+  flashColor(2, trebleRange, color(255));
 
   // ----------------------------------------------------------------------
 
+  triangleOutlines(color(255));
   // send frames to spout and end drawing
   senderEnd();
 }
 
 /////////////////////////////  VISUALS  ///////////////////////////////////
 
-class MovingLine {
-  float x, y;
-  float sWeight;
-  color cStroke;
-  float incr;
-  float scale;
-  Indicator indicator;
-  boolean moving;
-  float max;
-
-  MovingLine(Indicator _indicator, float _scale, color _cStroke, float _sWeight, float _incr) {
-    cStroke = _cStroke;
-    sWeight = _sWeight;
-    incr = _incr;
-    scale = _scale;
-    indicator = _indicator;
-    max = indicator.beatSize;
-    y = 0;
-    moving = true;
+void flashColor(int _canv, Indicator _range, color _col) {
+  if (_range.beat) {
+    canvas[_canv].fill(_col);
+    canvas[_canv].noStroke();
+    canvas[_canv].rect(-width/2, -height/2, width, height);
   }
+}
 
-  void move() {
-    if (y < max*scale) {
-      y += incr;
+void triangleZoom() {
+  for (int i=0; i < triangles.size(); i++) {
+    Triangle t = triangles.get(i);
+    if (t.ani.isEnded()) {
+      triangles.remove(i);
     }
   }
 
-  void display() {
-    stroke(cStroke);
-    strokeWeight(sWeight);
-    noFill();
-    line(0, y, width, 0);
+  if (bassRange.beat) {
+    triangles.add(new Triangle(0, 0, 1, 0));
+    int current = triangles.size()-1;
+    triangles.get(current).flipColor(colorToggle);
+    colorToggle = !colorToggle;
+    triangles.get(current).grow();
   }
+
+  for (Triangle t : triangles) {
+    t.display();
+  }
+}
+
+void moveLine(int _canv, Indicator _range) {
+  if (_range.beatCount % 4 == 0) {
+    float rotation;
+    rotation = random(0, PI);
+    canvas[_canv].rotate(rotation);
+  }
+  if (_range.beat) {
+    if (x1 < 0) {
+      Ani.to(this, 0.5, "x1", 300);
+    } else {
+      Ani.to(this, 0.5, "x1", -300);
+    }
+  }
+  canvas[_canv].strokeWeight(10);
+  canvas[_canv].stroke(255);
+  canvas[_canv].line(x1, -height/2, x1, height/2);
 }
 
 /////////////////////////////  CORE FUNCTIONS  ///////////////////////////////////
@@ -213,6 +214,7 @@ void senderDraw() {
 
 void senderTranslate() {
   for (int i=0; i < nSenders; i++) {
+    canvas[i].pushMatrix();
     canvas[i].translate(triCenter[0], triCenter[1]);
   }
 }
@@ -227,7 +229,11 @@ void senderEnd() {
 
 void triangleOutlines(color triColor) {
   for (int i=0; i < nSenders; i++) {
+    // popmatrix so the translation doesn't affect the triangle outlines
+    canvas[i].popMatrix();
+
     // draw triangle outlines
+    canvas[i].strokeWeight(1);
     canvas[i].stroke(triColor);
     canvas[i].noFill();
     canvas[i].triangle(0, canvas[i].height-1,
