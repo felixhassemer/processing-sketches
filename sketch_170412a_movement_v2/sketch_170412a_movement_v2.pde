@@ -3,6 +3,7 @@ import spout.*;
 import ddf.minim.*;
 import ddf.minim.analysis.*;
 import de.looksgood.ani.*;
+
 import themidibus.*;
 
 // MINIM variables
@@ -19,7 +20,7 @@ Indicator bassRange;       Indicator midRange;   Indicator trebleRange;
 
 // Indicator settings
 float bassSense = 0.5;     int bassLowT = 1;     int bassHighT = 6;    int bassThresh = 2;
-float midSense = 0.25;     int midLowT = 9;      int midHighT = 13;    int midThresh = 4;
+float midSense = 0.25;     int midLowT = 8;      int midHighT = 14;    int midThresh = 4;
 float trebleSense = 0.15;  int trebleLowT = 15;  int trebleHighT = 25; int trebleThresh = 4;
 
 // SPOUT variables
@@ -35,16 +36,22 @@ boolean[] keys =  new boolean[128];
 
 // COLOR variables
 color cBgnd = color(0);
+int r = 255; int g = 255; int b = 255;
+color cOne = color(r, g, b);
+boolean colorSwitch = true;
+int weight = 10;
 
 int[] triCenter = new int[2];
+// array for triangle corner positions after translation
+int[][] triCorners = { {-300, 200}, {0, -400}, {300, 200} };
+
+// CHOOSE variables
+int chooseOne = 0; int chooseTwo = 0; int chooseThree = 0;
 
 // ANIMATION variables
 float x1 = -300;
-// Triangle[] triangles;
-ArrayList<Triangle> triangles;
-ArrayList<Circle> circles;
-boolean colorToggle = true;
-boolean colorToggleCircle = true;
+// Arraylists :
+ArrayList<Triangle> triangles;    ArrayList<Circle> circles;    ArrayList<SideLine> sideLines;
 
 /////////////////////////////  SETUP  ///////////////////////////////////
 void setup() {
@@ -84,12 +91,12 @@ void setup() {
   // animation objects
   triangles = new ArrayList<Triangle>();
   circles = new ArrayList<Circle>();
+  sideLines = new ArrayList<SideLine>();
 
   // calculate centroids to translate to
   triCenter = centroid(0, canvas[0].height,
                       canvas[0].width/2, 0,
                       canvas[0].width, canvas[0].height);
-
 
   // apply fft window and calculate logarithmic averages
   fftLog.window(myWindow);
@@ -128,15 +135,17 @@ void draw() {
 
   // space for animations
   // ----------------------------------------------------------------------
+  if (bassRange.beat) colorSwitch = !colorSwitch;
+  // circleZoom(2);
+  // triangleZoom(0);
+  // linesToCenter(1);
+  //
+  // moveLine(1, bassRange);
+  chooseAnimation();
 
-  circleZoom();
-  triangleZoom();
-
-  moveLine(1, bassRange);
-
-  flashColor(0, bassRange, color(255));
-  flashColor(1, midRange, color(255));
-  flashColor(2, trebleRange, color(255));
+  // flashColor(0, bassRange, color(255));
+  // flashColor(1, midRange, color(255));
+  // flashColor(2, trebleRange, color(255));
 
   // ----------------------------------------------------------------------
 
@@ -147,6 +156,54 @@ void draw() {
 
 /////////////////////////////  VISUALS  ///////////////////////////////////
 
+void chooseAnimation() {
+  int functionCount = 4;
+  if (bassRange.beatCount % 32 == 0) {
+    chooseOne = round(random(functionCount));
+    chooseTwo = round(random(functionCount));
+    chooseThree = round(random(functionCount));
+  }
+
+  // choose Animation for Canvas One
+  if (chooseOne == 0) {
+    flashColor(0, bassRange, cOne);
+  } else if (chooseOne == 1) {
+    circleZoom(0, bassRange, cOne);
+  } else if (chooseOne == 2) {
+    triangleZoom(0, bassRange, cOne);
+  } else if (chooseOne == 3) {
+    linesToCenter(0, trebleRange, cOne);
+  } else if (chooseOne == 4) {
+    moveLine(0, bassRange, cOne, weight);
+  }
+
+  // choose Animation for Canvas Two
+  if (chooseTwo == 0) {
+    flashColor(1, midRange, cOne);
+  } else if (chooseTwo == 1) {
+    circleZoom(1, bassRange, cOne);
+  } else if (chooseTwo == 2) {
+    triangleZoom(1, bassRange, cOne);
+  } else if (chooseTwo == 3) {
+    linesToCenter(1, trebleRange, cOne);
+  } else if (chooseTwo == 4) {
+    moveLine(1, bassRange, cOne, weight);
+  }
+
+  // choose Animation for Canvas Three
+  if (chooseThree == 0) {
+    flashColor(2, trebleRange, cOne);
+  } else if (chooseThree == 1) {
+    circleZoom(2, bassRange, cOne);
+  } else if (chooseThree == 2) {
+    triangleZoom(2, bassRange, cOne);
+  } else if (chooseThree == 3) {
+    linesToCenter(2, trebleRange, cOne);
+  } else if (chooseThree == 4) {
+    moveLine(2, bassRange, cOne, weight);
+  }
+}
+
 void flashColor(int _canv, Indicator _range, color _col) {
   if (_range.beat) {
     canvas[_canv].fill(_col);
@@ -155,7 +212,47 @@ void flashColor(int _canv, Indicator _range, color _col) {
   }
 }
 
-void triangleZoom() {
+void particleExplosion(int _canv, Indicator _range, color _col) {
+  int canv = _canv;
+  Indicator range = _range;
+  color col = _col;
+}
+
+void linesToCenter(int _canv, Indicator _range, color _col) {
+  int canv = _canv;
+  Indicator range = _range;
+  color col = _col;
+
+  for (int i=0; i < sideLines.size(); i++) {
+    SideLine s = sideLines.get(i);
+    if (s.ani.isEnded()) {
+      sideLines.remove(i);
+    }
+  }
+
+  if (range.beat) {
+    int rC1 = round(random(2));
+    int rC2 = round(random(2));
+
+    // Parameters:  PApplet Parent, int canv, floats x1, y2, x2, y2
+    sideLines.add(new SideLine(this, canv,
+                                triCorners[rC1][0], triCorners[rC1][1],
+                                triCorners[rC2][0], triCorners[rC2][1]));
+    int current = sideLines.size()-1;
+    sideLines.get(current).move();
+  }
+
+  for (SideLine s : sideLines) {
+    s.display();
+  }
+}
+
+void triangleZoom(int _canv, Indicator _range, color _col) {
+  int canv = _canv;
+  Indicator range = _range;
+  color col = _col;
+
+  // delete objects if animation ended
   for (int i=0; i < triangles.size(); i++) {
     Triangle t = triangles.get(i);
     if (t.ani.isEnded()) {
@@ -163,11 +260,11 @@ void triangleZoom() {
     }
   }
 
-  if (bassRange.beat) {
-    triangles.add(new Triangle(0, 0, 1, 0));
+  if (range.beat) {
+    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
+    triangles.add(new Triangle(canv, 0, -100, 1, colorSwitch));
     int current = triangles.size()-1;
-    triangles.get(current).flipColor(colorToggle);
-    colorToggle = !colorToggle;
+    triangles.get(current).flipColor();
     triangles.get(current).grow();
   }
 
@@ -176,7 +273,12 @@ void triangleZoom() {
   }
 }
 
-void circleZoom() {
+void circleZoom(int _canv, Indicator _range, color _col) {
+  int canv = _canv;
+  Indicator range = _range;
+  color col = _col;
+
+  // delete objects if animation ended
   for (int i=0; i < circles.size(); i++) {
     Circle c = circles.get(i);
     if (c.ani.isEnded()) {
@@ -184,11 +286,11 @@ void circleZoom() {
     }
   }
 
-  if (bassRange.beat) {
-    circles.add(new Circle(0, 0, 1, 2));
+  if (range.beat) {
+    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
+    circles.add(new Circle(canv, 0, -20, 1, colorSwitch));
     int current = circles.size()-1;
-    circles.get(current).flipColor(colorToggleCircle);
-    colorToggleCircle = !colorToggleCircle;
+    circles.get(current).flipColor();
     circles.get(current).grow();
   }
 
@@ -197,13 +299,18 @@ void circleZoom() {
   }
 }
 
-void moveLine(int _canv, Indicator _range) {
-  if (_range.beatCount % 4 == 0) {
+void moveLine(int _canv, Indicator _range, color _col, int _sWeight) {
+  int canv = _canv;
+  Indicator range = _range;
+  color col = _col;
+  int sWeight = _sWeight;
+
+  if (range.beatCount % 8 == 0) {
     float rotation;
     rotation = random(0, PI);
-    canvas[_canv].rotate(rotation);
+    canvas[canv].rotate(rotation);
   }
-  if (_range.beat) {
+  if (range.beat) {
     if (x1 < 0) {
       Ani.to(this, 0.5, "x1", 300);
     } else {
@@ -211,7 +318,7 @@ void moveLine(int _canv, Indicator _range) {
     }
   }
   canvas[_canv].strokeWeight(10);
-  canvas[_canv].stroke(255);
+  canvas[_canv].stroke(col);
   canvas[_canv].line(x1, -height/2, x1, height/2);
 }
 
@@ -220,36 +327,42 @@ void moveLine(int _canv, Indicator _range) {
 void midiControl() {
   // change range parameters by pressing pad + knobs
   if (pads[40]) {                                         // pad 5
-    bassLowT = int(map(cc[1], 0, 1, 0, 10));                          // knob 5
-    bassHighT = int(map(cc[2], 0, 1, 6, 16));                         // knob 6
-    bassThresh = int(map(cc[3], 0, 1, 1, bassHighT-bassLowT));        // knob 7
-    bassSense = cc[4];                                                // knob 8
+    bassLowT = int(map(cc[1], 0, 1, 0, 10));                          // knob 1
+    bassHighT = int(map(cc[2], 0, 1, 6, 16));                         // knob 2
+    bassThresh = int(map(cc[3], 0, 1, 1, bassHighT-bassLowT));        // knob 3
+    bassSense = cc[4];                                                // knob 4
     println("-----------------------------------------");
     println("bass low threshold: " + bassLowT);
     println("bass high threshold: " + bassHighT);
     println("bass threshold: " + bassThresh);
     println("sensitivity: " + bassSense);
   } else if (pads[41]) {                                  // pad 6
-    midLowT = int(map(cc[1], 0, 1, 8, 16));                           // knob 5
-    midHighT = int(map(cc[2], 0, 1, 12, 22));                         // knob 6
-    midThresh = int(map(cc[3], 0, 1, 1, midHighT-midLowT));           // knob 7
-    midSense = cc[4];                                                 // knob 8
+    midLowT = int(map(cc[1], 0, 1, 8, 16));                           // knob 1
+    midHighT = int(map(cc[2], 0, 1, 12, 22));                         // knob 2
+    midThresh = int(map(cc[3], 0, 1, 1, midHighT-midLowT));           // knob 3
+    midSense = cc[4];                                                 // knob 4
     println("-----------------------------------------");
     println("mid low threshold: " + midLowT);
     println("mid high threshold: " + midHighT);
     println("mid threshold: " + midThresh);
     println("sensitivity: " + midSense);
   } else if (pads[42]) {                                   // pad 7
-    trebleLowT = int(map(cc[1], 0, 1, 16, 26));                       // knob 5
-    trebleHighT = int(map(cc[2], 0, 1, 20, 30));                      // knob 6
-    trebleThresh = int(map(cc[3], 0, 1, 1, trebleHighT-trebleLowT));  // knob 7
-    trebleSense = cc[4];                                              // knob 8
+    trebleLowT = int(map(cc[1], 0, 1, 16, 26));                       // knob 1
+    trebleHighT = int(map(cc[2], 0, 1, 20, 30));                      // knob 2
+    trebleThresh = int(map(cc[3], 0, 1, 1, trebleHighT-trebleLowT));  // knob 3
+    trebleSense = cc[4];                                              // knob 4
     println("-----------------------------------------");
     println("treble low threshold: " + trebleLowT);
     println("treble high threshold: " + trebleHighT);
     println("treble threshold: " + trebleThresh);
     println("sensitivity: " + trebleSense);
   }
+
+  // change colors with knobs
+  r = int(cc[5]*255);
+  g = int(cc[6]*255);
+  b = int(cc[7]*255);
+  cOne = color(r, g, b);
 }
 
 /////////////////////////////  CORE FUNCTIONS  ///////////////////////////////////

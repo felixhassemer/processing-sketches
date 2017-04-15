@@ -28,7 +28,7 @@ class Indicator {
     diameter = tempDiam;
     onC = tempOnC;
     offC = tempOffC;
-    beatCount = 1;
+    beatCount = 30;
     maxAmp = 400;
   }
 
@@ -51,7 +51,7 @@ class Indicator {
     amps = new float[fft.avgSize()];
 
     // reset beat counter after 4 bars
-    if (beatCount > 16) {
+    if (beatCount > 256) {
       beatCount = 1;
     }
 
