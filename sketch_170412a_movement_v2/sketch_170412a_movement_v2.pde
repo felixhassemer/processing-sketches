@@ -3,7 +3,6 @@ import spout.*;
 import ddf.minim.*;
 import ddf.minim.analysis.*;
 import de.looksgood.ani.*;
-
 import themidibus.*;
 
 // MINIM variables
@@ -36,9 +35,10 @@ boolean[] keys =  new boolean[128];
 
 // COLOR variables
 color cBgnd = color(0);
-int r = 255; int g = 255; int b = 255;
-color cOne = color(r, g, b);
+color cOne;
 boolean colorSwitch = true;
+float hueNoise = 0; float hueIncr = 0.002;
+float satNoise = 9872; float satIncr = 0.005;
 int weight = 10;
 
 int[] triCenter = new int[2];
@@ -51,7 +51,8 @@ int chooseOne = 0; int chooseTwo = 0; int chooseThree = 0;
 // ANIMATION variables
 float x1 = -300;
 // Arraylists :
-ArrayList<Triangle> triangles;    ArrayList<Circle> circles;    ArrayList<SideLine> sideLines;
+ArrayList<Triangle> triangles;    ArrayList<Circle> circles;
+ArrayList<SideLine> sideLines;    ArrayList<Particle> particles;
 
 /////////////////////////////  SETUP  ///////////////////////////////////
 void setup() {
@@ -92,6 +93,7 @@ void setup() {
   triangles = new ArrayList<Triangle>();
   circles = new ArrayList<Circle>();
   sideLines = new ArrayList<SideLine>();
+  particles = new ArrayList<Particle>();
 
   // calculate centroids to translate to
   triCenter = centroid(0, canvas[0].height,
@@ -105,6 +107,8 @@ void setup() {
   // set position and size of the fft graph
   log.setPosition(0, height);
   log.setSize(width/3, height-width/3);
+
+  colorMode(HSB, 360, 100, 100);
 }
 
 /////////////////////////////  DRAW  ///////////////////////////////////
@@ -133,20 +137,18 @@ void draw() {
   // translate to the centroids instead of canvas center
   senderTranslate();
 
+  // change RGB colors
+  chooseColors();
+
   // space for animations
   // ----------------------------------------------------------------------
   if (bassRange.beat) colorSwitch = !colorSwitch;
-  // circleZoom(2);
-  // triangleZoom(0);
-  // linesToCenter(1);
-  //
-  // moveLine(1, bassRange);
+
+  // randomly choose new Animation for each canvas every x beats
   chooseAnimation();
 
-  // flashColor(0, bassRange, color(255));
-  // flashColor(1, midRange, color(255));
-  // flashColor(2, trebleRange, color(255));
-
+  // remove all objects that have finished their animation
+  removeObjects();
   // ----------------------------------------------------------------------
 
   triangleOutlines(color(255));
@@ -157,7 +159,7 @@ void draw() {
 /////////////////////////////  VISUALS  ///////////////////////////////////
 
 void chooseAnimation() {
-  int functionCount = 4;
+  int functionCount = 8;
   if (bassRange.beatCount % 32 == 0) {
     chooseOne = round(random(functionCount));
     chooseTwo = round(random(functionCount));
@@ -168,39 +170,108 @@ void chooseAnimation() {
   if (chooseOne == 0) {
     flashColor(0, bassRange, cOne);
   } else if (chooseOne == 1) {
-    circleZoom(0, bassRange, cOne);
+    circleZoomFill(0, bassRange, cOne);
   } else if (chooseOne == 2) {
-    triangleZoom(0, bassRange, cOne);
+    triangleZoomFill(0, bassRange, cOne);
   } else if (chooseOne == 3) {
     linesToCenter(0, trebleRange, cOne);
   } else if (chooseOne == 4) {
     moveLine(0, bassRange, cOne, weight);
+  } else if (chooseOne == 5) {
+    particleStream(0, trebleRange, cOne);
+  } else if (chooseOne == 6) {
+    particleExplosion(0, bassRange, cOne);
+  } else if (chooseOne == 7) {
+    triangleZoomStroke(0, bassRange, cOne);
+  } else if (chooseOne == 8) {
+    circleZoomStroke(0, bassRange, cOne);
   }
 
   // choose Animation for Canvas Two
   if (chooseTwo == 0) {
     flashColor(1, midRange, cOne);
   } else if (chooseTwo == 1) {
-    circleZoom(1, bassRange, cOne);
+    circleZoomFill(1, bassRange, cOne);
   } else if (chooseTwo == 2) {
-    triangleZoom(1, bassRange, cOne);
+    triangleZoomFill(1, bassRange, cOne);
   } else if (chooseTwo == 3) {
     linesToCenter(1, trebleRange, cOne);
   } else if (chooseTwo == 4) {
     moveLine(1, bassRange, cOne, weight);
+  } else if (chooseTwo == 5) {
+    particleStream(1, trebleRange, cOne);
+  } else if (chooseTwo == 6) {
+    particleExplosion(1, midRange, cOne);
+  } else if (chooseTwo == 7) {
+    triangleZoomStroke(1, bassRange, cOne);
+  } else if (chooseTwo == 8) {
+    circleZoomStroke(1, bassRange, cOne);
   }
 
   // choose Animation for Canvas Three
   if (chooseThree == 0) {
     flashColor(2, trebleRange, cOne);
   } else if (chooseThree == 1) {
-    circleZoom(2, bassRange, cOne);
+    circleZoomFill(2, bassRange, cOne);
   } else if (chooseThree == 2) {
-    triangleZoom(2, bassRange, cOne);
+    triangleZoomFill(2, bassRange, cOne);
   } else if (chooseThree == 3) {
     linesToCenter(2, trebleRange, cOne);
   } else if (chooseThree == 4) {
     moveLine(2, bassRange, cOne, weight);
+  } else if (chooseThree == 5) {
+    particleStream(2, bassRange, cOne);
+  } else if (chooseThree == 6) {
+    particleExplosion(2, midRange, cOne);
+  } else if (chooseThree == 7) {
+    triangleZoomStroke(2, trebleRange, cOne);
+  } else if (chooseThree == 8) {
+    circleZoomStroke(2, bassRange, cOne);
+  }
+}
+
+void chooseColors() {
+  int h, s, b;
+  h = int(map(noise(hueNoise), 0, 1, -60, 420));
+  h = constrain(h, 0, 360);
+  s = int(map(noise(satNoise), 0, 1, -20, 120));
+  s = constrain(s, 0, 100);
+  b = 100;
+  hueNoise += hueIncr;
+  satNoise += satIncr;
+  cOne = color(h, s, b);
+  // println(h, s);
+}
+
+void removeObjects() {
+  // delete objects if animation ended
+  // remove PARTICLE
+  for (int i=0; i < particles.size(); i++) {
+    Particle p = particles.get(i);
+    if (p.ani.isEnded()) {
+      particles.remove(i);
+    }
+  }
+  // remove SIDELINE
+  for (int i=0; i < sideLines.size(); i++) {
+    SideLine s = sideLines.get(i);
+    if (s.ani.isEnded()) {
+      sideLines.remove(i);
+    }
+  }
+  // remove TRIANGLE
+  for (int i=0; i < triangles.size(); i++) {
+    Triangle t = triangles.get(i);
+    if (t.ani.isEnded()) {
+      triangles.remove(i);
+    }
+  }
+  // remove CIRCLE
+  for (int i=0; i < circles.size(); i++) {
+    Circle c = circles.get(i);
+    if (c.ani.isEnded()) {
+      circles.remove(i);
+    }
   }
 }
 
@@ -212,23 +283,52 @@ void flashColor(int _canv, Indicator _range, color _col) {
   }
 }
 
+void particleStream(int _canv, Indicator _range, color _col) {
+  int canv = _canv;
+  Indicator range = _range;
+  color col = _col;
+
+  if (range.beat) {
+    int particleCount = int(map(range.beatSize, 0, 1, 0, 100));
+    for (float i=0; i <= particleCount; i++) {
+      float a = random(0, TWO_PI);
+      particles.add(new Particle(this, canv, a, 0, cOne));
+      int current = particles.size()-1;
+      particles.get(current).move();
+    }
+  }
+
+  for (Particle p : particles) {
+    p.polar();
+    p.display();
+  }
+}
+
 void particleExplosion(int _canv, Indicator _range, color _col) {
   int canv = _canv;
   Indicator range = _range;
   color col = _col;
+
+  if (range.beat) {
+    int particleCount = int(random(4, 30));
+    for (float a=0; a < TWO_PI; a += TWO_PI/particleCount) {
+      // Parameters:  PApplet Parent, int canv, floats a, r, color col
+      particles.add(new Particle(this, canv, a, 0, cOne));
+      int current = particles.size()-1;
+      particles.get(current).moveInverse();
+    }
+  }
+
+  for (Particle p : particles) {
+    p.polar();
+    p.display();
+  }
 }
 
 void linesToCenter(int _canv, Indicator _range, color _col) {
   int canv = _canv;
   Indicator range = _range;
   color col = _col;
-
-  for (int i=0; i < sideLines.size(); i++) {
-    SideLine s = sideLines.get(i);
-    if (s.ani.isEnded()) {
-      sideLines.remove(i);
-    }
-  }
 
   if (range.beat) {
     int rC1 = round(random(2));
@@ -247,22 +347,14 @@ void linesToCenter(int _canv, Indicator _range, color _col) {
   }
 }
 
-void triangleZoom(int _canv, Indicator _range, color _col) {
+void triangleZoomFill(int _canv, Indicator _range, color _col) {
   int canv = _canv;
   Indicator range = _range;
   color col = _col;
 
-  // delete objects if animation ended
-  for (int i=0; i < triangles.size(); i++) {
-    Triangle t = triangles.get(i);
-    if (t.ani.isEnded()) {
-      triangles.remove(i);
-    }
-  }
-
   if (range.beat) {
     // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
-    triangles.add(new Triangle(canv, 0, -100, 1, colorSwitch));
+    triangles.add(new Triangle(canv, 0, -100, 1, colorSwitch, 0));
     int current = triangles.size()-1;
     triangles.get(current).flipColor();
     triangles.get(current).grow();
@@ -273,24 +365,50 @@ void triangleZoom(int _canv, Indicator _range, color _col) {
   }
 }
 
-void circleZoom(int _canv, Indicator _range, color _col) {
+void triangleZoomStroke(int _canv, Indicator _range, color _col) {
   int canv = _canv;
   Indicator range = _range;
   color col = _col;
 
-  // delete objects if animation ended
-  for (int i=0; i < circles.size(); i++) {
-    Circle c = circles.get(i);
-    if (c.ani.isEnded()) {
-      circles.remove(i);
-    }
+  if (range.beat) {
+    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
+    triangles.add(new Triangle(canv, 0, -100, 1, false, 5));
+    int current = triangles.size()-1;
+    triangles.get(current).grow();
   }
+
+  for (Triangle t : triangles) {
+    t.display();
+  }
+}
+
+void circleZoomFill(int _canv, Indicator _range, color _col) {
+  int canv = _canv;
+  Indicator range = _range;
+  color col = _col;
 
   if (range.beat) {
     // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
-    circles.add(new Circle(canv, 0, -20, 1, colorSwitch));
+    circles.add(new Circle(canv, 0, -20, 1, colorSwitch, 0));
     int current = circles.size()-1;
     circles.get(current).flipColor();
+    circles.get(current).grow();
+  }
+
+  for (Circle c : circles) {
+    c.display();
+  }
+}
+
+void circleZoomStroke(int _canv, Indicator _range, color _col) {
+  int canv = _canv;
+  Indicator range = _range;
+  color col = _col;
+
+  if (range.beat) {
+    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, float weight
+    circles.add(new Circle(canv, 0, -20, 1, false, 5));
+    int current = circles.size()-1;
     circles.get(current).grow();
   }
 
@@ -357,12 +475,6 @@ void midiControl() {
     println("treble threshold: " + trebleThresh);
     println("sensitivity: " + trebleSense);
   }
-
-  // change colors with knobs
-  r = int(cc[5]*255);
-  g = int(cc[6]*255);
-  b = int(cc[7]*255);
-  cOne = color(r, g, b);
 }
 
 /////////////////////////////  CORE FUNCTIONS  ///////////////////////////////////
