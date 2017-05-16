@@ -23,7 +23,7 @@ float midSense = 0.25;     int midLowT = 8;      int midHighT = 14;    int midTh
 float trebleSense = 0.15;  int trebleLowT = 15;  int trebleHighT = 25; int trebleThresh = 4;
 
 // SPOUT variables
-int nSenders = 3;
+int nSenders = 2;
 PGraphics[] canvas;
 Spout[] senders;
 
@@ -160,7 +160,7 @@ void draw() {
 
 void chooseAnimation() {
   int functionCount = 8;
-  if (bassRange.beatCount % 32 == 0) {
+  if (bassRange.beatCount % 16 == 0) {
     chooseOne = round(random(functionCount));
     chooseTwo = round(random(functionCount));
     chooseThree = round(random(functionCount));
@@ -199,35 +199,35 @@ void chooseAnimation() {
   } else if (chooseTwo == 4) {
     moveLine(1, bassRange, cOne, weight);
   } else if (chooseTwo == 5) {
-    particleStream(1, trebleRange, cOne);
+    particleStream(1, bassRange, cOne);
   } else if (chooseTwo == 6) {
     particleExplosion(1, midRange, cOne);
   } else if (chooseTwo == 7) {
-    triangleZoomStroke(1, bassRange, cOne);
+    triangleZoomStroke(1, trebleRange, cOne);
   } else if (chooseTwo == 8) {
     circleZoomStroke(1, bassRange, cOne);
   }
 
   // choose Animation for Canvas Three
-  if (chooseThree == 0) {
-    flashColor(2, trebleRange, cOne);
-  } else if (chooseThree == 1) {
-    circleZoomFill(2, bassRange, cOne);
-  } else if (chooseThree == 2) {
-    triangleZoomFill(2, bassRange, cOne);
-  } else if (chooseThree == 3) {
-    linesToCenter(2, trebleRange, cOne);
-  } else if (chooseThree == 4) {
-    moveLine(2, bassRange, cOne, weight);
-  } else if (chooseThree == 5) {
-    particleStream(2, bassRange, cOne);
-  } else if (chooseThree == 6) {
-    particleExplosion(2, midRange, cOne);
-  } else if (chooseThree == 7) {
-    triangleZoomStroke(2, trebleRange, cOne);
-  } else if (chooseThree == 8) {
-    circleZoomStroke(2, bassRange, cOne);
-  }
+  // if (chooseThree == 0) {
+  //   flashColor(2, trebleRange, cOne);
+  // } else if (chooseThree == 1) {
+  //   // circleZoomFill(2, bassRange, cOne);
+  // } else if (chooseThree == 2) {
+  //   // triangleZoomFill(2, bassRange, cOne);
+  // } else if (chooseThree == 3) {
+  //   // linesToCenter(2, trebleRange, cOne);
+  // } else if (chooseThree == 4) {
+  //   // moveLine(2, bassRange, cOne, weight);
+  // } else if (chooseThree == 5) {
+  //   // particleStream(2, bassRange, cOne);
+  // } else if (chooseThree == 6) {
+  //   // particleExplosion(2, midRange, cOne);
+  // } else if (chooseThree == 7) {
+  //   // triangleZoomStroke(2, trebleRange, cOne);
+  // } else if (chooseThree == 8) {
+  //   // circleZoomStroke(2, bassRange, cOne);
+  // }
 }
 
 void chooseColors() {
@@ -445,8 +445,8 @@ void moveLine(int _canv, Indicator _range, color _col, int _sWeight) {
 void midiControl() {
   // change range parameters by pressing pad + knobs
   if (pads[40]) {                                         // pad 5
-    bassLowT = int(map(cc[1], 0, 1, 0, 10));                          // knob 1
-    bassHighT = int(map(cc[2], 0, 1, 6, 16));                         // knob 2
+    bassLowT = int(map(cc[1], 0, 1, 0, 15));                          // knob 1
+    bassHighT = int(map(cc[2], 0, 1, 6, 30));                         // knob 2
     bassThresh = int(map(cc[3], 0, 1, 1, bassHighT-bassLowT));        // knob 3
     bassSense = cc[4];                                                // knob 4
     println("-----------------------------------------");
@@ -455,8 +455,8 @@ void midiControl() {
     println("bass threshold: " + bassThresh);
     println("sensitivity: " + bassSense);
   } else if (pads[41]) {                                  // pad 6
-    midLowT = int(map(cc[1], 0, 1, 8, 16));                           // knob 1
-    midHighT = int(map(cc[2], 0, 1, 12, 22));                         // knob 2
+    midLowT = int(map(cc[1], 0, 1, 8, 25));                           // knob 1
+    midHighT = int(map(cc[2], 0, 1, 10, 35));                         // knob 2
     midThresh = int(map(cc[3], 0, 1, 1, midHighT-midLowT));           // knob 3
     midSense = cc[4];                                                 // knob 4
     println("-----------------------------------------");
@@ -465,8 +465,8 @@ void midiControl() {
     println("mid threshold: " + midThresh);
     println("sensitivity: " + midSense);
   } else if (pads[42]) {                                   // pad 7
-    trebleLowT = int(map(cc[1], 0, 1, 16, 26));                       // knob 1
-    trebleHighT = int(map(cc[2], 0, 1, 20, 30));                      // knob 2
+    trebleLowT = int(map(cc[1], 0, 1, 12, 30));                       // knob 1
+    trebleHighT = int(map(cc[2], 0, 1, 14, 45));                      // knob 2
     trebleThresh = int(map(cc[3], 0, 1, 1, trebleHighT-trebleLowT));  // knob 3
     trebleSense = cc[4];                                              // knob 4
     println("-----------------------------------------");
@@ -537,7 +537,7 @@ void triangleOutlines(color triColor) {
     canvas[i].popMatrix();
 
     // draw triangle outlines
-    canvas[i].strokeWeight(1);
+    canvas[i].strokeWeight(10);
     canvas[i].stroke(triColor);
     canvas[i].noFill();
     canvas[i].triangle(0, canvas[i].height-1,
