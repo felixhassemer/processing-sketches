@@ -42,6 +42,7 @@ float satNoise = 9872; float satIncr = 0.005;
 int weight = 10;
 
 int[] triCenter = new int[2];
+int[] rectCenter = new int[2];
 // array for triangle corner positions after translation
 int[][] triCorners = { {-300, 200}, {0, -400}, {300, 200} };
 
@@ -99,6 +100,7 @@ void setup() {
   triCenter = centroid(0, canvas[0].height,
                       canvas[0].width/2, 0,
                       canvas[0].width, canvas[0].height);
+  rectCenter = centroid(0, 0, canvas[0].width, canvas[0].height);
 
   // apply fft window and calculate logarithmic averages
   fftLog.window(myWindow);
@@ -151,7 +153,7 @@ void draw() {
   removeObjects();
   // ----------------------------------------------------------------------
 
-  triangleOutlines(color(255));
+  outlines(color(255));
   // send frames to spout and end drawing
   senderEnd();
 }
@@ -160,7 +162,7 @@ void draw() {
 
 void chooseAnimation() {
   int functionCount = 8;
-  if (bassRange.beatCount % 8 == 0) {
+  if (bassRange.beatCount % 16 == 0) {
     chooseOne = round(random(functionCount));
     chooseTwo = round(random(functionCount));
     chooseThree = round(random(functionCount));
@@ -172,7 +174,7 @@ void chooseAnimation() {
   } else if (chooseOne == 1) {
     circleZoomFill(0, bassRange, cOne);
   } else if (chooseOne == 2) {
-    triangleZoomFill(0, bassRange, cOne);
+    // triangleZoomFill(0, bassRange, cOne);
   } else if (chooseOne == 3) {
     linesToCenter(0, trebleRange, cOne);
   } else if (chooseOne == 4) {
@@ -182,7 +184,7 @@ void chooseAnimation() {
   } else if (chooseOne == 6) {
     particleExplosion(0, bassRange, cOne);
   } else if (chooseOne == 7) {
-    triangleZoomStroke(0, bassRange, cOne);
+    // triangleZoomStroke(0, bassRange, cOne);
   } else if (chooseOne == 8) {
     circleZoomStroke(0, bassRange, cOne);
   }
@@ -193,7 +195,7 @@ void chooseAnimation() {
   } else if (chooseTwo == 1) {
     circleZoomFill(1, bassRange, cOne);
   } else if (chooseTwo == 2) {
-    triangleZoomFill(1, bassRange, cOne);
+    // triangleZoomFill(1, bassRange, cOne);
   } else if (chooseTwo == 3) {
     linesToCenter(1, trebleRange, cOne);
   } else if (chooseTwo == 4) {
@@ -203,7 +205,7 @@ void chooseAnimation() {
   } else if (chooseTwo == 6) {
     particleExplosion(1, midRange, cOne);
   } else if (chooseTwo == 7) {
-    triangleZoomStroke(1, trebleRange, cOne);
+    // triangleZoomStroke(1, trebleRange, cOne);
   } else if (chooseTwo == 8) {
     circleZoomStroke(1, bassRange, cOne);
   }
@@ -389,7 +391,7 @@ void circleZoomFill(int _canv, Indicator _range, color _col) {
 
   if (range.beat) {
     // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
-    circles.add(new Circle(canv, 0, -20, 1, colorSwitch, 0));
+    circles.add(new Circle(canv, 0, 0, 1, colorSwitch, 0));
     int current = circles.size()-1;
     circles.get(current).flipColor();
     circles.get(current).grow();
@@ -407,7 +409,7 @@ void circleZoomStroke(int _canv, Indicator _range, color _col) {
 
   if (range.beat) {
     // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, float weight
-    circles.add(new Circle(canv, 0, -20, 1, false, 5));
+    circles.add(new Circle(canv, 0, 0, 1, false, 5));
     int current = circles.size()-1;
     circles.get(current).grow();
   }
@@ -487,6 +489,14 @@ int[] centroid(int x1, int y1, int x2, int y2, int x3, int y3) {
   return centerPoint;
 }
 
+// centroid of rectangle
+int[] centroid(int x1, int y1, int w1, int h1) {
+  int x = int((x1 + w1)/2);
+  int y = int((y1 + h1)/2);
+  int [] centerPoint = {x, y};
+  return centerPoint;
+}
+
 // midpoint of two points
 int[] midPoint(int x1, int y1, int x2, int y2) {
   int x = int((x1 + x2)/2);
@@ -519,7 +529,11 @@ void senderDraw() {
 void senderTranslate() {
   for (int i=0; i < nSenders; i++) {
     canvas[i].pushMatrix();
-    canvas[i].translate(triCenter[0], triCenter[1]);
+    if (i == 2) {
+      canvas[i].translate(triCenter[0], triCenter[1]);
+    } else {
+      canvas[i].translate(rectCenter[0], rectCenter[1]);
+    }
   }
 }
 
@@ -531,19 +545,22 @@ void senderEnd() {
   }
 }
 
-void triangleOutlines(color triColor) {
+void outlines(color cOutlines) {
+  int outlineWeight = 10;
+  int outlineOff = outlineWeight / 2;
   for (int i=0; i < nSenders; i++) {
     // popmatrix so the translation doesn't affect the triangle outlines
     canvas[i].popMatrix();
 
     // draw triangle outlines
-    canvas[i].strokeWeight(10);
-    canvas[i].stroke(triColor);
+    canvas[i].strokeWeight(outlineWeight);
+    canvas[i].stroke(cOutlines);
     canvas[i].noFill();
-    canvas[i].triangle(0, canvas[i].height-1,
-                      canvas[i].width/2, 1,
-                      canvas[i].width, canvas[i].height-1);
+    canvas[i].rect(outlineOff, outlineOff, canvas[i].width-outlineOff*2, canvas[i].height-outlineOff*2);
   }
+  canvas[2].triangle(outlineOff, canvas[2].height-outlineOff,
+    canvas[2].width/2, outlineOff,
+    canvas[2].width-outlineOff, canvas[2].height-outlineOff);
 }
 
 // MIDI functions
