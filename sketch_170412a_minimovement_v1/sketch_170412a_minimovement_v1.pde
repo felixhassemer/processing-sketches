@@ -116,6 +116,7 @@ void setup() {
 /////////////////////////////  DRAW  ///////////////////////////////////
 void draw() {
   background(cBgnd);
+  showFramerate();
 
   // check midi signals
   midiControl();
@@ -242,7 +243,6 @@ void chooseColors() {
   hueNoise += hueIncr;
   satNoise += satIncr;
   cOne = color(h, s, b);
-  // println(h, s);
 }
 
 void removeObjects() {
@@ -277,19 +277,15 @@ void removeObjects() {
   }
 }
 
-void flashColor(int _canv, Indicator _range, color _col) {
-  if (_range.beat) {
-    canvas[_canv].fill(_col);
-    canvas[_canv].noStroke();
-    canvas[_canv].rect(-width/2, -height/2, width, height);
+void flashColor(int canv, Indicator range, color col) {
+  if (range.beat) {
+    canvas[canv].fill(col);
+    canvas[canv].noStroke();
+    canvas[canv].rect(-width/2, -height/2, width, height);
   }
 }
 
-void particleStream(int _canv, Indicator _range, color _col) {
-  int canv = _canv;
-  Indicator range = _range;
-  color col = _col;
-
+void particleStream(int canv, Indicator range, color col) {
   if (range.beat) {
     int particleCount = int(map(range.beatSize, 0, 1, 0, 100));
     for (float i=0; i <= particleCount; i++) {
@@ -306,11 +302,7 @@ void particleStream(int _canv, Indicator _range, color _col) {
   }
 }
 
-void particleExplosion(int _canv, Indicator _range, color _col) {
-  int canv = _canv;
-  Indicator range = _range;
-  color col = _col;
-
+void particleExplosion(int canv, Indicator range, color col) {
   if (range.beat) {
     int particleCount = int(random(4, 30));
     for (float a=0; a < TWO_PI; a += TWO_PI/particleCount) {
@@ -327,11 +319,7 @@ void particleExplosion(int _canv, Indicator _range, color _col) {
   }
 }
 
-void linesToCenter(int _canv, Indicator _range, color _col) {
-  int canv = _canv;
-  Indicator range = _range;
-  color col = _col;
-
+void linesToCenter(int canv, Indicator range, color col) {
   if (range.beat) {
     int rC1 = round(random(2));
     int rC2 = round(random(2));
@@ -349,11 +337,7 @@ void linesToCenter(int _canv, Indicator _range, color _col) {
   }
 }
 
-void triangleZoomFill(int _canv, Indicator _range, color _col) {
-  int canv = _canv;
-  Indicator range = _range;
-  color col = _col;
-
+void triangleZoomFill(int canv, Indicator range, color col) {
   if (range.beat) {
     // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
     triangles.add(new Triangle(canv, 0, -100, 1, colorSwitch, 0));
@@ -367,11 +351,7 @@ void triangleZoomFill(int _canv, Indicator _range, color _col) {
   }
 }
 
-void triangleZoomStroke(int _canv, Indicator _range, color _col) {
-  int canv = _canv;
-  Indicator range = _range;
-  color col = _col;
-
+void triangleZoomStroke(int canv, Indicator range, color col) {
   if (range.beat) {
     // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
     triangles.add(new Triangle(canv, 0, -100, 1, false, 5));
@@ -384,11 +364,7 @@ void triangleZoomStroke(int _canv, Indicator _range, color _col) {
   }
 }
 
-void circleZoomFill(int _canv, Indicator _range, color _col) {
-  int canv = _canv;
-  Indicator range = _range;
-  color col = _col;
-
+void circleZoomFill(int canv, Indicator range, color col) {
   if (range.beat) {
     // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
     circles.add(new Circle(canv, 0, 0, 1, colorSwitch, 0));
@@ -402,11 +378,7 @@ void circleZoomFill(int _canv, Indicator _range, color _col) {
   }
 }
 
-void circleZoomStroke(int _canv, Indicator _range, color _col) {
-  int canv = _canv;
-  Indicator range = _range;
-  color col = _col;
-
+void circleZoomStroke(int canv, Indicator range, color col) {
   if (range.beat) {
     // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, float weight
     circles.add(new Circle(canv, 0, 0, 1, false, 5));
@@ -419,12 +391,7 @@ void circleZoomStroke(int _canv, Indicator _range, color _col) {
   }
 }
 
-void moveLine(int _canv, Indicator _range, color _col, int _sWeight) {
-  int canv = _canv;
-  Indicator range = _range;
-  color col = _col;
-  int sWeight = _sWeight;
-
+void moveLine(int canv, Indicator range, color col, int sWeight) {
   if (range.beatCount % 8 == 0) {
     float rotation;
     rotation = random(0, PI);
@@ -614,6 +581,12 @@ void controllerChange(int channel, int number, int value) {
 
   // put all normalized values in cc array
   cc[number] = norm(value, 0, 127);
+}
+
+void showFramerate() {
+  textSize(32);
+  fill(255);
+  text(frameRate, 1000, 750);
 }
 
 // close minim and midibus
