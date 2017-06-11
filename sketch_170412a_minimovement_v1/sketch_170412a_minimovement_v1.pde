@@ -47,7 +47,7 @@ int[] rectCenter = new int[2];
 int[][] triCorners = { {-300, 200}, {0, -400}, {300, 200} };
 
 // CHOOSE variables
-int chooseOne = 0; int chooseTwo = 0; int chooseThree = 0;
+int[] choose = new int[3];
 
 // ANIMATION variables
 float x1 = -300;
@@ -79,8 +79,8 @@ void setup() {
   source =      minim.getLineIn(Minim.STEREO, 1024);
   fftLog =      new FFT(source.bufferSize(), source.sampleRate());
   bassRange =   new Indicator(width/3 + 100, 700, 150, color(128), color(255));
-  midRange =    new Indicator(bassRange.x + bassRange.diameter/2, 700, 100, color(80), color(255));
-  trebleRange = new Indicator(midRange.x + midRange.diameter/2, 700, 50, color(30), color(255));
+  midRange =    new Indicator(bassRange.x + bassRange.diam/2, 700, 100, color(80), color(255));
+  trebleRange = new Indicator(midRange.x + midRange.diam/2, 700, 50, color(30), color(255));
   log =         new LogGraph(fftLog, color(128), color(0, 200, 0), color(200, 0, 0));
 
   // List all Midi devices
@@ -153,7 +153,7 @@ void draw() {
   removeObjects();
   // ----------------------------------------------------------------------
 
-  outlines(color(255));
+  outlines(color(255), 10);
   // send frames to spout and end drawing
   senderEnd();
 }
@@ -163,71 +163,71 @@ void draw() {
 void chooseAnimation() {
   int functionCount = 8;
   if (bassRange.beatCount % 16 == 0) {
-    chooseOne = round(random(functionCount));
-    chooseTwo = round(random(functionCount));
-    chooseThree = round(random(functionCount));
+    choose[0] = round(random(functionCount));
+    choose[1] = round(random(functionCount));
+    choose[2] = round(random(functionCount));
   }
 
   // choose Animation for Canvas One
-  if (chooseOne == 0) {
+  if (choose[0] == 0) {
     flashColor(0, bassRange, cOne);
-  } else if (chooseOne == 1) {
+  } else if (choose[0] == 1) {
     circleZoomFill(0, bassRange, cOne);
-  } else if (chooseOne == 2) {
+  } else if (choose[0] == 2) {
     // triangleZoomFill(0, bassRange, cOne);
-  } else if (chooseOne == 3) {
+  } else if (choose[0] == 3) {
     linesToCenter(0, trebleRange, cOne);
-  } else if (chooseOne == 4) {
+  } else if (choose[0] == 4) {
     moveLine(0, bassRange, cOne, weight);
-  } else if (chooseOne == 5) {
+  } else if (choose[0] == 5) {
     particleStream(0, trebleRange, cOne);
-  } else if (chooseOne == 6) {
+  } else if (choose[0] == 6) {
     particleExplosion(0, bassRange, cOne);
-  } else if (chooseOne == 7) {
+  } else if (choose[0] == 7) {
     // triangleZoomStroke(0, bassRange, cOne);
-  } else if (chooseOne == 8) {
+  } else if (choose[0] == 8) {
     circleZoomStroke(0, bassRange, cOne);
   }
 
   // choose Animation for Canvas Two
-  if (chooseTwo == 0) {
+  if (choose[1] == 0) {
     flashColor(1, midRange, cOne);
-  } else if (chooseTwo == 1) {
+  } else if (choose[1] == 1) {
     circleZoomFill(1, bassRange, cOne);
-  } else if (chooseTwo == 2) {
+  } else if (choose[1] == 2) {
     // triangleZoomFill(1, bassRange, cOne);
-  } else if (chooseTwo == 3) {
+  } else if (choose[1] == 3) {
     linesToCenter(1, trebleRange, cOne);
-  } else if (chooseTwo == 4) {
+  } else if (choose[1] == 4) {
     moveLine(1, bassRange, cOne, weight);
-  } else if (chooseTwo == 5) {
+  } else if (choose[1] == 5) {
     particleStream(1, bassRange, cOne);
-  } else if (chooseTwo == 6) {
+  } else if (choose[1] == 6) {
     particleExplosion(1, midRange, cOne);
-  } else if (chooseTwo == 7) {
+  } else if (choose[1] == 7) {
     // triangleZoomStroke(1, trebleRange, cOne);
-  } else if (chooseTwo == 8) {
+  } else if (choose[1] == 8) {
     circleZoomStroke(1, bassRange, cOne);
   }
 
   // choose Animation for Canvas Three
-  if (chooseThree == 0) {
+  if (choose[2] == 0) {
     flashColor(2, trebleRange, cOne);
-  } else if (chooseThree == 1) {
+  } else if (choose[2] == 1) {
     circleZoomFill(2, bassRange, cOne);
-  } else if (chooseThree == 2) {
+  } else if (choose[2] == 2) {
     triangleZoomFill(2, bassRange, cOne);
-  } else if (chooseThree == 3) {
+  } else if (choose[2] == 3) {
     linesToCenter(2, trebleRange, cOne);
-  } else if (chooseThree == 4) {
+  } else if (choose[2] == 4) {
     moveLine(2, bassRange, cOne, weight);
-  } else if (chooseThree == 5) {
+  } else if (choose[2] == 5) {
     particleStream(2, bassRange, cOne);
-  } else if (chooseThree == 6) {
+  } else if (choose[2] == 6) {
     particleExplosion(2, midRange, cOne);
-  } else if (chooseThree == 7) {
+  } else if (choose[2] == 7) {
     triangleZoomStroke(2, trebleRange, cOne);
-  } else if (chooseThree == 8) {
+  } else if (choose[2] == 8) {
     circleZoomStroke(2, bassRange, cOne);
   }
 }
@@ -437,9 +437,9 @@ void moveLine(int _canv, Indicator _range, color _col, int _sWeight) {
       Ani.to(this, 0.5, "x1", -300);
     }
   }
-  canvas[_canv].strokeWeight(10);
-  canvas[_canv].stroke(col);
-  canvas[_canv].line(x1, -height/2, x1, height/2);
+  canvas[canv].strokeWeight(10);
+  canvas[canv].stroke(col);
+  canvas[canv].line(x1, -height/2, x1, height/2);
 }
 
 /////////////////////////////  MIDI CONTROLS  ////////////////////////////////////
@@ -545,8 +545,7 @@ void senderEnd() {
   }
 }
 
-void outlines(color cOutlines) {
-  int outlineWeight = 10;
+void outlines(color cOutlines, int outlineWeight) {
   int outlineOff = outlineWeight / 2;
   for (int i=0; i < nSenders; i++) {
     // popmatrix so the translation doesn't affect the triangle outlines

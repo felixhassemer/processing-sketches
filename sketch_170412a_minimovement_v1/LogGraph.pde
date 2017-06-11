@@ -11,15 +11,15 @@ class LogGraph {
   color cGraph, cBandRange, cActiveBand;
 
   // CONSTRUCTOR
-  LogGraph(FFT fftTemp, color tempCGraph, color tempCBandRange, color tempCActiveBand) {
-    fft = fftTemp;
-    maxAmp = 400;
-    cGraph = tempCGraph;
-    cBandRange = tempCBandRange;
-    cActiveBand = tempCActiveBand;
-    normArray = new float[512];
-    amps = new float[512];
-    h = new float[512];
+  LogGraph(FFT fft, color cGraph, color cBandRange, color cActiveBand) {
+    this.fft = fft;
+    this.maxAmp = 400;
+    this.cGraph = cGraph;
+    this.cBandRange = cBandRange;
+    this.cActiveBand = cActiveBand;
+    this.normArray = new float[512];
+    this.amps = new float[512];
+    this.h = new float[512];
   }
 
   // position of lower left corner of the graph

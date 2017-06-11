@@ -1,5 +1,5 @@
 class Indicator {
-  float x, y, diameter;
+  float x, y, diam;
   color col, onC, offC;
   FFT fft;
   float[] normArray;
@@ -22,14 +22,14 @@ class Indicator {
 
   // CONSTRUCTOR
   ///////////////////////////////////////////////////////////
-  Indicator(float tempX, float tempY, float tempDiam, color tempOffC, color tempOnC) {
-    x = tempX;
-    y = tempY;
-    diameter = tempDiam;
-    onC = tempOnC;
-    offC = tempOffC;
-    beatCount = 30;
-    maxAmp = 400;
+  Indicator(float x, float y, float diam, color offC, color onC) {
+    this.x = x;
+    this.y = y;
+    this.diam = diam;
+    this.onC = onC;
+    this.offC = offC;
+    this.beatCount = 30;
+    this.maxAmp = 400;
   }
 
   // METHODS
@@ -110,6 +110,6 @@ class Indicator {
   void display() {
     fill(col);
     noStroke();
-    ellipse(x, y, diameter, diameter);
+    ellipse(x, y, diam, diam);
   }
 }

@@ -1,5 +1,5 @@
 class Triangle {
-  float x, y, diameter;
+  float x, y, diam;
   int canv;
   color col;
   boolean toggle;
@@ -10,7 +10,7 @@ class Triangle {
     this.canv = canv;
     this.x = x;
     this.y = y;
-    this.diameter = diam;
+    this.diam = diam;
     this.toggle = toggle;
     this.weight = weight;
   }
@@ -23,11 +23,11 @@ class Triangle {
       col = color(cOne);
       canvas[canv].stroke(col);
       canvas[canv].noFill();
-      canvas[canv].strokeWeight(this.weight/diameter);
+      canvas[canv].strokeWeight(this.weight/this.diam);
     }
     canvas[canv].pushMatrix();
     canvas[canv].translate(x, y);
-    canvas[canv].scale(diameter);
+    canvas[canv].scale(diam);
     canvas[canv].triangle(-1, 1,
                           0, -1,
                           1, 1);
@@ -35,7 +35,7 @@ class Triangle {
   }
 
   void grow() {
-    ani = new Ani(this, 3, "diameter", canvas[canv].width/2-10);
+    ani = new Ani(this, 3, "diam", canvas[canv].width/2-10);
   }
 
   void flipColor() {

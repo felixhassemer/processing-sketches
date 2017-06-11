@@ -1,4 +1,4 @@
-class Circle {
+class Rectangle {
   float x, y, diam;
   int canv;
   color col;
@@ -6,7 +6,7 @@ class Circle {
   Ani ani;
   float weight;
 
-  Circle(int canv, float x, float y, float diam, boolean toggle, float weight) {
+  Rectangle(int canv, float x, float y, float diam, boolean toggle, float weight) {
     this.canv = canv;
     this.x = x;
     this.y = y;
@@ -22,13 +22,14 @@ class Circle {
     } else {
       col = cOne;
       canvas[canv].stroke(col);
-      canvas[canv].strokeWeight(this.weight/this.diam);
+      canvas[canv].strokeWeight(this.weight/diam);
       canvas[canv].noFill();
     }
     canvas[canv].pushMatrix();
     canvas[canv].translate(x, y);
     canvas[canv].scale(diam);
-    canvas[canv].ellipse(0, 0, 1, 1);
+    canvas[canv].rectMode(CENTER);
+    canvas[canv].rect(0, 0, 1, 1);
     canvas[canv].popMatrix();
   }
 
