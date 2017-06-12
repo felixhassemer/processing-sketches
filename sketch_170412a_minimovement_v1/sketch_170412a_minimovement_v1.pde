@@ -172,14 +172,15 @@ void chooseAnimation() {
     choose[1] = round(random(functionCount));
     // choose[1] = 9;
     choose[2] = round(random(functionCount));
-    choose[2] = 2;
+    // choose[2] = 2;
   }
 
   // choose Animation for Canvas One
   if (choose[0] == 0) {
     flashColor(0, bassRange, cOne);
   } else if (choose[0] == 1) {
-    circleZoomFill(0, bassRange, cOne);
+    // with fill
+    circleZoom(0, bassRange, cOne, 0);
   } else if (choose[0] == 2) {
     rectZoomStroke(1, midRange, cOne);
   } else if (choose[0] == 3) {
@@ -193,15 +194,18 @@ void chooseAnimation() {
   } else if (choose[0] == 7) {
     rectZoomFill(0, bassRange, cOne);
   } else if (choose[0] == 8) {
-    circleZoomStroke(0, bassRange, cOne);
+    // with stroke
+    circleZoom(0, bassRange, cOne, 5);
   } else if (choose[0] == 9) {
+    // stroke + reverse
+    circleZoom(0, bassRange, cOne, 5, true);
   }
 
   // choose Animation for Canvas Two
   if (choose[1] == 0) {
     flashColor(1, midRange, cOne);
   } else if (choose[1] == 1) {
-    circleZoomFill(1, bassRange, cOne);
+    circleZoom(1, bassRange, cOne, 0);
   } else if (choose[1] == 2) {
     rectZoomStroke(1, midRange, cOne);
   } else if (choose[1] == 3) {
@@ -215,8 +219,11 @@ void chooseAnimation() {
   } else if (choose[1] == 7) {
     rectZoomFill(1, bassRange, cOne);
   } else if (choose[1] == 8) {
-    circleZoomStroke(1, bassRange, cOne);
+    // with stroke
+    circleZoom(1, bassRange, cOne, 5);
   } else if (choose[1] == 9) {
+    // stroke + reverse
+    circleZoom(1, bassRange, cOne, 5, true);
   }
 
   // choose Animation for Canvas Three
@@ -235,8 +242,11 @@ void chooseAnimation() {
   } else if (choose[2] == 6) {
     triangleZoomStroke(2, trebleRange, cOne);
   } else if (choose[2] == 7) {
-    circleZoomStroke(2, bassRange, cOne);
+    // with stroke
+    circleZoom(2, bassRange, cOne, 5);
   } else if (choose[2] == 8) {
+    // stroke + reverse
+    circleZoom(2, bassRange, cOne, 5, true);
   }
 }
 
@@ -415,10 +425,10 @@ void triangleZoomStroke(int canv, Indicator range, color col) {
   }
 }
 
-void circleZoomFill(int canv, Indicator range, color col) {
+void circleZoom(int canv, Indicator range, color col, int sW) {
   if (range.beat) {
     // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
-    circles.add(new Circle(canv, 0, 0, 1, colorSwitch, 0));
+    circles.add(new Circle(canv, 0, 0, 1, colorSwitch, sW));
     int current = circles.size()-1;
     circles.get(current).flipColor();
     circles.get(current).grow();
@@ -429,13 +439,16 @@ void circleZoomFill(int canv, Indicator range, color col) {
   }
 }
 
-void circleZoomStroke(int canv, Indicator range, color col) {
+void circleZoom(int canv, Indicator range, color col, int sW, boolean reverse) {
   if (range.beat) {
-    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, float weight
-    circles.add(new Circle(canv, 0, 0, 1, false, 5));
+    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
+    circles.add(new Circle(canv, 0, 0, 1, colorSwitch, sW));
     int current = circles.size()-1;
+    circles.get(current).flipColor();
+    if (reverse) {
+      circles.get(current).moveInverse();
+    }
     circles.get(current).grow();
-    circles.get(current).moveInverse();
   }
 
   for (Circle c : circles) {
