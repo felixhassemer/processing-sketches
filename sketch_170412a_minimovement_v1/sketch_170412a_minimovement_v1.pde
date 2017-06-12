@@ -172,7 +172,7 @@ void chooseAnimation() {
     choose[1] = round(random(functionCount));
     // choose[1] = 9;
     choose[2] = round(random(functionCount));
-    // choose[2] = 9;
+    choose[2] = 2;
   }
 
   // choose Animation for Canvas One
@@ -223,23 +223,20 @@ void chooseAnimation() {
   if (choose[2] == 0) {
     flashColor(2, trebleRange, cOne);
   } else if (choose[2] == 1) {
-
-  } else if (choose[2] == 2) {
     triangleZoomFill(2, bassRange, cOne);
-  } else if (choose[2] == 3) {
+  } else if (choose[2] == 2) {
     triLines(2, trebleRange, cOne);
-  } else if (choose[2] == 4) {
+  } else if (choose[2] == 3) {
     moveLine(2, bassRange, cOne, weight);
-  } else if (choose[2] == 5) {
+  } else if (choose[2] == 4) {
     particleStream(2, bassRange, cOne);
-  } else if (choose[2] == 6) {
+  } else if (choose[2] == 5) {
     particleExplosion(2, midRange, cOne);
-  } else if (choose[2] == 7) {
+  } else if (choose[2] == 6) {
     triangleZoomStroke(2, trebleRange, cOne);
-  } else if (choose[2] == 8) {
+  } else if (choose[2] == 7) {
     circleZoomStroke(2, bassRange, cOne);
-  } else if (choose[2] == 9) {
-
+  } else if (choose[2] == 8) {
   }
 }
 
@@ -341,6 +338,16 @@ void triLines(int canv, Indicator range, color col) {
     int rC1 = round(random(2));
     int rC2 = round(random(2));
 
+    boolean check = false;
+
+    while (check != true) {
+      rC2 = round(random(2));
+      if (rC2 != rC1) {
+        check = true;
+        break;
+      }
+    }
+
     // Parameters:  PApplet Parent, int canv, floats x1, y2, x2, y2
     sideLines.add(new SideLine(this, canv,
                                 triCorners[rC1][0], triCorners[rC1][1],
@@ -359,6 +366,15 @@ void rectLines(int canv, Indicator range, color col) {
     int rC1 = round(random(3));
     int rC2 = round(random(3));
 
+    boolean check = false;
+
+    while (check != true) {
+      rC2 = round(random(3));
+      if (rC2 != rC1) {
+        check = true;
+        break;
+      }
+    }
     // Parameters:  PApplet Parent, int canv, floats x1, y2, x2, y2
     sideLines.add(new SideLine(this, canv,
                                 rectCorners[rC1][0], rectCorners[rC1][1],
