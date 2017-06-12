@@ -33,7 +33,7 @@ class Circle {
   }
 
   void grow() {
-    ani = new Ani(this, 3, "diam", canvas[canv].width+100);
+    ani = new Ani(this, 3, "diam", canvas[canv].width-150);
   }
 
   void flipColor() {
@@ -43,5 +43,12 @@ class Circle {
     } else {
       col = color(cOne);
     }
+  }
+
+  void moveInverse() {
+    // ani.reverse();
+    diam = canvas[canv].width+200;
+    ani = new Ani(this, 3, "diam", canvas[canv].width-150);
+
   }
 }

@@ -22,7 +22,7 @@ class Rectangle {
     } else {
       col = cOne;
       canvas[canv].stroke(col);
-      canvas[canv].strokeWeight(this.weight/diam);
+      canvas[canv].strokeWeight(this.weight/this.diam);
       canvas[canv].noFill();
     }
     canvas[canv].pushMatrix();
@@ -30,6 +30,7 @@ class Rectangle {
     canvas[canv].scale(diam);
     canvas[canv].rectMode(CENTER);
     canvas[canv].rect(0, 0, 1, 1);
+    canvas[canv].rectMode(CORNER);
     canvas[canv].popMatrix();
   }
 

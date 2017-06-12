@@ -45,6 +45,7 @@ int[] triCenter = new int[2];
 int[] rectCenter = new int[2];
 // array for triangle corner positions after translation
 int[][] triCorners = { {-300, 200}, {0, -400}, {300, 200} };
+int[][] rectCorners = { {-300, -300}, {300, -300}, {300, 300}, {-300, 300} };
 
 // CHOOSE variables
 int[] choose = new int[3];
@@ -54,6 +55,7 @@ float x1 = -300;
 // Arraylists :
 ArrayList<Triangle> triangles;    ArrayList<Circle> circles;
 ArrayList<SideLine> sideLines;    ArrayList<Particle> particles;
+ArrayList<Rectangle> rectangles;
 
 /////////////////////////////  SETUP  ///////////////////////////////////
 void setup() {
@@ -95,6 +97,7 @@ void setup() {
   circles = new ArrayList<Circle>();
   sideLines = new ArrayList<SideLine>();
   particles = new ArrayList<Particle>();
+  rectangles = new ArrayList<Rectangle>();
 
   // calculate centroids to translate to
   triCenter = centroid(0, canvas[0].height,
@@ -165,8 +168,11 @@ void chooseAnimation() {
   int functionCount = 8;
   if (bassRange.beatCount % 16 == 0) {
     choose[0] = round(random(functionCount));
+    // choose[0] = 9;
     choose[1] = round(random(functionCount));
+    // choose[1] = 9;
     choose[2] = round(random(functionCount));
+    // choose[2] = 9;
   }
 
   // choose Animation for Canvas One
@@ -175,9 +181,9 @@ void chooseAnimation() {
   } else if (choose[0] == 1) {
     circleZoomFill(0, bassRange, cOne);
   } else if (choose[0] == 2) {
-    // triangleZoomFill(0, bassRange, cOne);
+    rectZoomStroke(1, midRange, cOne);
   } else if (choose[0] == 3) {
-    linesToCenter(0, trebleRange, cOne);
+    rectLines(0, trebleRange, cOne);
   } else if (choose[0] == 4) {
     moveLine(0, bassRange, cOne, weight);
   } else if (choose[0] == 5) {
@@ -185,9 +191,10 @@ void chooseAnimation() {
   } else if (choose[0] == 6) {
     particleExplosion(0, bassRange, cOne);
   } else if (choose[0] == 7) {
-    // triangleZoomStroke(0, bassRange, cOne);
+    rectZoomFill(0, bassRange, cOne);
   } else if (choose[0] == 8) {
     circleZoomStroke(0, bassRange, cOne);
+  } else if (choose[0] == 9) {
   }
 
   // choose Animation for Canvas Two
@@ -196,9 +203,9 @@ void chooseAnimation() {
   } else if (choose[1] == 1) {
     circleZoomFill(1, bassRange, cOne);
   } else if (choose[1] == 2) {
-    // triangleZoomFill(1, bassRange, cOne);
+    rectZoomStroke(1, midRange, cOne);
   } else if (choose[1] == 3) {
-    linesToCenter(1, trebleRange, cOne);
+    rectLines(1, midRange, cOne);
   } else if (choose[1] == 4) {
     moveLine(1, bassRange, cOne, weight);
   } else if (choose[1] == 5) {
@@ -206,20 +213,21 @@ void chooseAnimation() {
   } else if (choose[1] == 6) {
     particleExplosion(1, midRange, cOne);
   } else if (choose[1] == 7) {
-    // triangleZoomStroke(1, trebleRange, cOne);
+    rectZoomFill(1, bassRange, cOne);
   } else if (choose[1] == 8) {
     circleZoomStroke(1, bassRange, cOne);
+  } else if (choose[1] == 9) {
   }
 
   // choose Animation for Canvas Three
   if (choose[2] == 0) {
     flashColor(2, trebleRange, cOne);
   } else if (choose[2] == 1) {
-    circleZoomFill(2, bassRange, cOne);
+
   } else if (choose[2] == 2) {
     triangleZoomFill(2, bassRange, cOne);
   } else if (choose[2] == 3) {
-    linesToCenter(2, trebleRange, cOne);
+    triLines(2, trebleRange, cOne);
   } else if (choose[2] == 4) {
     moveLine(2, bassRange, cOne, weight);
   } else if (choose[2] == 5) {
@@ -230,6 +238,8 @@ void chooseAnimation() {
     triangleZoomStroke(2, trebleRange, cOne);
   } else if (choose[2] == 8) {
     circleZoomStroke(2, bassRange, cOne);
+  } else if (choose[2] == 9) {
+
   }
 }
 
@@ -273,6 +283,13 @@ void removeObjects() {
     Circle c = circles.get(i);
     if (c.ani.isEnded()) {
       circles.remove(i);
+    }
+  }
+  // remove RECTANGLE
+  for (int i=0; i < rectangles.size(); i++) {
+    Rectangle r = rectangles.get(i);
+    if (r.ani.isEnded()) {
+      rectangles.remove(i);
     }
   }
 }
@@ -319,7 +336,7 @@ void particleExplosion(int canv, Indicator range, color col) {
   }
 }
 
-void linesToCenter(int canv, Indicator range, color col) {
+void triLines(int canv, Indicator range, color col) {
   if (range.beat) {
     int rC1 = round(random(2));
     int rC2 = round(random(2));
@@ -328,6 +345,24 @@ void linesToCenter(int canv, Indicator range, color col) {
     sideLines.add(new SideLine(this, canv,
                                 triCorners[rC1][0], triCorners[rC1][1],
                                 triCorners[rC2][0], triCorners[rC2][1]));
+    int current = sideLines.size()-1;
+    sideLines.get(current).move();
+  }
+
+  for (SideLine s : sideLines) {
+    s.display();
+  }
+}
+
+void rectLines(int canv, Indicator range, color col) {
+  if (range.beat) {
+    int rC1 = round(random(3));
+    int rC2 = round(random(3));
+
+    // Parameters:  PApplet Parent, int canv, floats x1, y2, x2, y2
+    sideLines.add(new SideLine(this, canv,
+                                rectCorners[rC1][0], rectCorners[rC1][1],
+                                rectCorners[rC2][0], rectCorners[rC2][1]));
     int current = sideLines.size()-1;
     sideLines.get(current).move();
   }
@@ -384,10 +419,38 @@ void circleZoomStroke(int canv, Indicator range, color col) {
     circles.add(new Circle(canv, 0, 0, 1, false, 5));
     int current = circles.size()-1;
     circles.get(current).grow();
+    circles.get(current).moveInverse();
   }
 
   for (Circle c : circles) {
     c.display();
+  }
+}
+
+void rectZoomFill(int canv, Indicator range, color col) {
+  if (range.beat) {
+    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
+    rectangles.add(new Rectangle(canv, 0, 0, 1, colorSwitch, 0));
+    int current = rectangles.size()-1;
+    rectangles.get(current).flipColor();
+    rectangles.get(current).grow();
+  }
+
+  for (Rectangle r : rectangles) {
+    r.display();
+  }
+}
+
+void rectZoomStroke(int canv, Indicator range, color col) {
+  if (range.beat) {
+    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, float weight
+    rectangles.add(new Rectangle(canv, 0, 0, 1, false, 5));
+    int current = rectangles.size()-1;
+    rectangles.get(current).grow();
+  }
+
+  for (Rectangle r : rectangles) {
+    r.display();
   }
 }
 
