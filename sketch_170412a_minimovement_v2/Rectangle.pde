@@ -16,22 +16,18 @@ class Rectangle {
   }
 
   void display() {
-    if (this.weight == 0) {
+    if (weight == 0) {
       canvas[canv].fill(col);
       canvas[canv].noStroke();
     } else {
       col = cOne;
       canvas[canv].stroke(col);
-      canvas[canv].strokeWeight(this.weight/this.diam);
+      canvas[canv].strokeWeight(weight);
       canvas[canv].noFill();
     }
-    canvas[canv].pushMatrix();
-    canvas[canv].translate(x, y);
-    canvas[canv].scale(diam);
     canvas[canv].rectMode(CENTER);
-    canvas[canv].rect(0, 0, 1, 1);
+    canvas[canv].rect(x, y, diam, diam);
     canvas[canv].rectMode(CORNER);
-    canvas[canv].popMatrix();
   }
 
   void grow() {

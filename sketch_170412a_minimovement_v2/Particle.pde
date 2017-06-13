@@ -24,10 +24,7 @@ class Particle {
     canvas[canv].stroke(col);
     canvas[canv].strokeWeight(10);
     canvas[canv].noFill();
-    canvas[canv].pushMatrix();
-    canvas[canv].translate(x, y);
-    canvas[canv].point(0, 0);
-    canvas[canv].popMatrix();
+    canvas[canv].point(x, y);
   }
 
   void move() {

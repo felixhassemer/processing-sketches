@@ -57,6 +57,9 @@ ArrayList<Triangle> triangles;    ArrayList<Circle> circles;
 ArrayList<SideLine> sideLines;    ArrayList<Particle> particles;
 ArrayList<Rectangle> rectangles;
 
+// removal of animation objects
+ArrayList toRemove;
+
 /////////////////////////////  SETUP  ///////////////////////////////////
 void setup() {
   // windowsize
@@ -98,6 +101,9 @@ void setup() {
   sideLines = new ArrayList<SideLine>();
   particles = new ArrayList<Particle>();
   rectangles = new ArrayList<Rectangle>();
+
+  toRemove = new ArrayList();
+
 
   // calculate centroids to translate to
   triCenter = centroid(0, canvas[0].height,
@@ -188,9 +194,9 @@ void chooseAnimation() {
   } else if (choose[0] == 4) {
     moveLine(0, bassRange, cOne, weight);
   } else if (choose[0] == 5) {
-    particleStream(0, trebleRange, cOne);
+    particleSystem(0, trebleRange, cOne, "STREAM");
   } else if (choose[0] == 6) {
-    particleExplosion(0, bassRange, cOne);
+    particleSystem(0, bassRange, cOne, "EXPLOSION");
   } else if (choose[0] == 7) {
     rectZoomFill(0, bassRange, cOne);
   } else if (choose[0] == 8) {
@@ -213,9 +219,9 @@ void chooseAnimation() {
   } else if (choose[1] == 4) {
     moveLine(1, bassRange, cOne, weight);
   } else if (choose[1] == 5) {
-    particleStream(1, bassRange, cOne);
+    particleSystem(1, bassRange, cOne, "STREAM");
   } else if (choose[1] == 6) {
-    particleExplosion(1, midRange, cOne);
+    particleSystem(1, midRange, cOne, "EXPLOSION");
   } else if (choose[1] == 7) {
     rectZoomFill(1, bassRange, cOne);
   } else if (choose[1] == 8) {
@@ -236,9 +242,9 @@ void chooseAnimation() {
   } else if (choose[2] == 3) {
     moveLine(2, bassRange, cOne, weight);
   } else if (choose[2] == 4) {
-    particleStream(2, bassRange, cOne);
+    particleSystem(2, bassRange, cOne, "STREAM");
   } else if (choose[2] == 5) {
-    particleExplosion(2, midRange, cOne);
+    particleSystem(2, midRange, cOne, "EXPLOSION");
   } else if (choose[2] == 6) {
     triangleZoomStroke(2, trebleRange, cOne);
   } else if (choose[2] == 7) {
@@ -265,40 +271,38 @@ void chooseColors() {
 void removeObjects() {
   // delete objects if animation ended
   // remove PARTICLE
-  for (int i=0; i < particles.size(); i++) {
-    Particle p = particles.get(i);
-    if (p.ani.isEnded()) {
-      particles.remove(i);
-    }
+  for (Particle p : particles) {
+    if (p.ani.isEnded()) toRemove.add(p);
   }
+
   // remove SIDELINE
-  for (int i=0; i < sideLines.size(); i++) {
-    SideLine s = sideLines.get(i);
-    if (s.ani.isEnded()) {
-      sideLines.remove(i);
-    }
+  for (SideLine s : sideLines) {
+    if (s.ani.isEnded()) toRemove.add(s);
   }
+
   // remove TRIANGLE
-  for (int i=0; i < triangles.size(); i++) {
-    Triangle t = triangles.get(i);
-    if (t.ani.isEnded()) {
-      triangles.remove(i);
-    }
+  for (Triangle t : triangles) {
+    if (t.ani.isEnded()) toRemove.add(t);
   }
+
   // remove CIRCLE
-  for (int i=0; i < circles.size(); i++) {
-    Circle c = circles.get(i);
-    if (c.ani.isEnded()) {
-      circles.remove(i);
-    }
+  for (Circle c : circles) {
+    if (c.ani.isEnded()) toRemove.add(c);
   }
+
   // remove RECTANGLE
-  for (int i=0; i < rectangles.size(); i++) {
-    Rectangle r = rectangles.get(i);
-    if (r.ani.isEnded()) {
-      rectangles.remove(i);
-    }
+  for (Rectangle r : rectangles) {
+    if (r.ani.isEnded()) toRemove.add(r);
   }
+
+  // remove all objects that have finished animating
+  particles.removeAll(toRemove);
+  sideLines.removeAll(toRemove);
+  triangles.removeAll(toRemove);
+  circles.removeAll(toRemove);
+  rectangles.removeAll(toRemove);
+  // clear removal arraylist
+  toRemove.clear();
 }
 
 void flashColor(int canv, Indicator range, color col) {
@@ -309,31 +313,27 @@ void flashColor(int canv, Indicator range, color col) {
   }
 }
 
-void particleStream(int canv, Indicator range, color col) {
+void particleSystem(int canv, Indicator range, color col, String type) {
   if (range.beat) {
-    int particleCount = int(map(range.beatSize, 0, 1, 0, 100));
-    for (float i=0; i <= particleCount; i++) {
-      float a = random(0, TWO_PI);
-      particles.add(new Particle(this, canv, a, 0, cOne));
-      int current = particles.size()-1;
-      particles.get(current).move();
-    }
-  }
-
-  for (Particle p : particles) {
-    p.polar();
-    p.display();
-  }
-}
-
-void particleExplosion(int canv, Indicator range, color col) {
-  if (range.beat) {
-    int particleCount = int(random(4, 30));
-    for (float a=0; a < TWO_PI; a += TWO_PI/particleCount) {
-      // Parameters:  PApplet Parent, int canv, floats a, r, color col
-      particles.add(new Particle(this, canv, a, 0, cOne));
-      int current = particles.size()-1;
-      particles.get(current).moveInverse();
+    if (type == "STREAM") {
+      int particleCount = int(map(range.beatSize, 0, 1, 0, 100));
+      for (float i=0; i <= particleCount; i++) {
+        float a = random(0, TWO_PI);
+        particles.add(new Particle(this, canv, a, 0, cOne));
+        int current = particles.size()-1;
+        particles.get(current).move();
+      }
+    } else if (type == "EXPLOSION") {
+      int particleCount = int(random(4, 30));
+      for (float a=0; a < TWO_PI; a += TWO_PI/particleCount) {
+        // Parameters:  PApplet Parent, int canv, floats a, r, color col
+        particles.add(new Particle(this, canv, a, 0, cOne));
+        int current = particles.size()-1;
+        particles.get(current).moveInverse();
+      }
+    } else {
+      // error message
+      println("animation type undefined");
     }
   }
 

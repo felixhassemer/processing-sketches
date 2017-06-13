@@ -16,16 +16,16 @@ class Circle {
   }
 
   void display() {
-    if (this.weight == 0) {
+    if (weight == 0) {
       canvas[canv].fill(col);
       canvas[canv].noStroke();
     } else {
       col = cOne;
       canvas[canv].stroke(col);
-      canvas[canv].strokeWeight(this.weight/this.diam);
+      canvas[canv].strokeWeight(weight);
       canvas[canv].noFill();
     }
-    canvas[canv].ellipse(this.x, this.y, this.diam, this.diam);
+    canvas[canv].ellipse(x, y, diam, diam);
   }
 
   void grow() {
