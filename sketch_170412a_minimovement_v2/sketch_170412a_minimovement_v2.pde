@@ -175,9 +175,13 @@ void chooseAnimation() {
   if (bassRange.beatCount % 16 == 0) {
     choose[0] = round(random(functionCount));
     // choose[0] = 9;
-    choose[1] = round(random(functionCount));
+    while (choose[1] == choose[0]) {                                // check again until other number
+      choose[1] = round(random(functionCount));
+    }
     // choose[1] = 9;
-    choose[2] = round(random(functionCount));
+    while ((choose[2] == choose[0]) || (choose[2] == choose[1])) {  // check again until other number
+      choose[2] = round(random(functionCount));
+    }
     // choose[2] = 2;
   }
 
@@ -317,7 +321,7 @@ void particleSystem(int canv, Indicator range, color col, String type) {
         particles.get(current).move();
       }
     } else if (type == "EXPLOSION") {
-      particleCount = int(random(4, 26));
+      int particleCount = int(random(4, 26));
       for (float a=0; a < TWO_PI; a += TWO_PI/particleCount) {
         // Parameters:  PApplet Parent, int canv, floats a, r, color col
         particles.add(new Particle(this, canv, a, 0, cOne));
