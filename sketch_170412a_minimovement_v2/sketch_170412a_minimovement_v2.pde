@@ -37,8 +37,8 @@ boolean[] keys =  new boolean[128];
 color cBgnd = color(0);
 color cOne;
 boolean colorSwitch = true;
-float hueNoise = 0; float hueIncr = 0.002;
-float satNoise = 9872; float satIncr = 0.005;
+float hueNoise = 0; float hueIncr = 0.001;
+float satNoise = 9872; float satIncr = 0.003;
 int weight = 10;
 
 int[] triCenter = new int[2];
@@ -119,7 +119,7 @@ void setup() {
   log.setPosition(0, height);
   log.setSize(width/3, height-width/3);
 
-  colorMode(HSB, 360, 100, 100);
+  colorMode(HSB, 360, 100, 100, 100);
 }
 
 /////////////////////////////  DRAW  ///////////////////////////////////
@@ -128,7 +128,7 @@ void draw() {
   showFramerate();
 
   // check midi signals
-  midiControl();
+  // midiControl();
 
   // forward source to fft
   fftLog.forward(source.mix);
@@ -171,7 +171,7 @@ void draw() {
 /////////////////////////////  VISUALS  ///////////////////////////////////
 
 void chooseAnimation() {
-  int functionCount = 8;
+  int functionCount = 9;
   if (bassRange.beatCount % 16 == 0) {
     choose[0] = round(random(functionCount));
     // choose[0] = 9;
@@ -181,14 +181,13 @@ void chooseAnimation() {
     // choose[2] = 2;
   }
 
-  // choose Animation for Canvas One
+  //  Animation for CANVAS ZERO
   if (choose[0] == 0) {
     flashColor(0, bassRange, cOne);
   } else if (choose[0] == 1) {
-    // with fill
-    circleZoom(0, bassRange, cOne, 0, false);
+    circleZoom(0, bassRange, cOne, 0, false);     // fill
   } else if (choose[0] == 2) {
-    rectZoomStroke(1, midRange, cOne);
+    rectZoom(1, midRange, cOne, 0, false);        // fill
   } else if (choose[0] == 3) {
     rectLines(0, trebleRange, cOne);
   } else if (choose[0] == 4) {
@@ -198,22 +197,20 @@ void chooseAnimation() {
   } else if (choose[0] == 6) {
     particleSystem(0, bassRange, cOne, "EXPLOSION");
   } else if (choose[0] == 7) {
-    rectZoomFill(0, bassRange, cOne);
+    rectZoom(0, bassRange, cOne, 5, false);       // stroke
   } else if (choose[0] == 8) {
-    // with stroke
-    circleZoom(0, bassRange, cOne, 5, false);
+    circleZoom(0, bassRange, cOne, 5, false);     // stroke
   } else if (choose[0] == 9) {
-    // stroke + reverse
-    circleZoom(0, bassRange, cOne, 5, true);
+    circleZoom(0, bassRange, cOne, 5, true);      // stroke + reverse
   }
 
-  // choose Animation for Canvas Two
+  // Animation for CANVAS ONE
   if (choose[1] == 0) {
     flashColor(1, midRange, cOne);
   } else if (choose[1] == 1) {
-    circleZoom(1, bassRange, cOne, 0, false);
+    circleZoom(1, bassRange, cOne, 0, false);     // fill
   } else if (choose[1] == 2) {
-    rectZoomStroke(1, midRange, cOne);
+    rectZoom(1, midRange, cOne, 0, false);        // fill
   } else if (choose[1] == 3) {
     rectLines(1, midRange, cOne);
   } else if (choose[1] == 4) {
@@ -223,20 +220,18 @@ void chooseAnimation() {
   } else if (choose[1] == 6) {
     particleSystem(1, midRange, cOne, "EXPLOSION");
   } else if (choose[1] == 7) {
-    rectZoomFill(1, bassRange, cOne);
+    rectZoom(1, bassRange, cOne, 5, false);       // stroke
   } else if (choose[1] == 8) {
-    // with stroke
-    circleZoom(1, bassRange, cOne, 5, false);
+    circleZoom(1, bassRange, cOne, 5, false);     // stroke
   } else if (choose[1] == 9) {
-    // stroke + reverse
-    circleZoom(1, bassRange, cOne, 5, true);
+    circleZoom(1, bassRange, cOne, 5, true);      // stroke + reverse
   }
 
-  // choose Animation for Canvas Three
+  // Animation for CANVAS TWO
   if (choose[2] == 0) {
     flashColor(2, trebleRange, cOne);
   } else if (choose[2] == 1) {
-    triangleZoomFill(2, bassRange, cOne);
+    triangleZoom(2, bassRange, cOne, 0);          // with fill
   } else if (choose[2] == 2) {
     triLines(2, trebleRange, cOne);
   } else if (choose[2] == 3) {
@@ -246,13 +241,11 @@ void chooseAnimation() {
   } else if (choose[2] == 5) {
     particleSystem(2, midRange, cOne, "EXPLOSION");
   } else if (choose[2] == 6) {
-    triangleZoomStroke(2, trebleRange, cOne);
+    triangleZoom(2, trebleRange, cOne, 5);        // with stroke
   } else if (choose[2] == 7) {
-    // with stroke
-    circleZoom(2, bassRange, cOne, 5, false);
+    circleZoom(2, bassRange, cOne, 5, false);     // with stroke
   } else if (choose[2] == 8) {
-    // stroke + reverse
-    circleZoom(2, bassRange, cOne, 5, true);
+    circleZoom(2, bassRange, cOne, 5, true);      // stroke + reverse
   }
 }
 
@@ -316,7 +309,7 @@ void flashColor(int canv, Indicator range, color col) {
 void particleSystem(int canv, Indicator range, color col, String type) {
   if (range.beat) {
     if (type == "STREAM") {
-      int particleCount = int(map(range.beatSize, 0, 1, 0, 100));
+      int particleCount = int(map(range.beatSize, 0, 1, 0, 40));
       for (float i=0; i <= particleCount; i++) {
         float a = random(0, TWO_PI);
         particles.add(new Particle(this, canv, a, 0, cOne));
@@ -324,7 +317,7 @@ void particleSystem(int canv, Indicator range, color col, String type) {
         particles.get(current).move();
       }
     } else if (type == "EXPLOSION") {
-      int particleCount = int(random(4, 30));
+      particleCount = int(random(4, 26));
       for (float a=0; a < TWO_PI; a += TWO_PI/particleCount) {
         // Parameters:  PApplet Parent, int canv, floats a, r, color col
         particles.add(new Particle(this, canv, a, 0, cOne));
@@ -358,10 +351,11 @@ void triLines(int canv, Indicator range, color col) {
       }
     }
 
-    // Parameters:  PApplet Parent, int canv, floats x1, y2, x2, y2
+    // Parameters:  PApplet Parent, int canv, floats x1, y2, x2, y2, color
     sideLines.add(new SideLine(this, canv,
                                 triCorners[rC1][0], triCorners[rC1][1],
-                                triCorners[rC2][0], triCorners[rC2][1]));
+                                triCorners[rC2][0], triCorners[rC2][1],
+                                cOne));
     int current = sideLines.size()-1;
     sideLines.get(current).move();
   }
@@ -385,10 +379,11 @@ void rectLines(int canv, Indicator range, color col) {
         break;
       }
     }
-    // Parameters:  PApplet Parent, int canv, floats x1, y2, x2, y2
+    // Parameters:  PApplet Parent, int canv, floats x1, y2, x2, y2, color
     sideLines.add(new SideLine(this, canv,
                                 rectCorners[rC1][0], rectCorners[rC1][1],
-                                rectCorners[rC2][0], rectCorners[rC2][1]));
+                                rectCorners[rC2][0], rectCorners[rC2][1],
+                                cOne));
     int current = sideLines.size()-1;
     sideLines.get(current).move();
   }
@@ -398,28 +393,25 @@ void rectLines(int canv, Indicator range, color col) {
   }
 }
 
-void triangleZoomFill(int canv, Indicator range, color col) {
+void triangleZoom(int canv, Indicator range, color col, int sW) {
   if (range.beat) {
-    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
-    triangles.add(new Triangle(canv, 0, -100, 1, colorSwitch, 0));
-    int current = triangles.size()-1;
-    triangles.get(current).flipColor();
-    triangles.get(current).grow();
+    if (sW == 0) {
+      // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, strokeWeight, color
+      // with fill
+      triangles.add(new Triangle(canv, 0, -100, 1, colorSwitch, 0, cOne));
+      int current = triangles.size()-1;
+      triangles.get(current).flipColor();
+      triangles.get(current).grow();
+    } else {
+      // Parameters:  int canv, floats x, y, diameter, boolean colortoggle. strokeWeight, color
+      // with stroke
+      triangles.add(new Triangle(canv, 0, -100, 1, false, 5, cOne));
+      int current = triangles.size()-1;
+      triangles.get(current).grow();
+    }
   }
 
-  for (Triangle t : triangles) {
-    t.display();
-  }
-}
-
-void triangleZoomStroke(int canv, Indicator range, color col) {
-  if (range.beat) {
-    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
-    triangles.add(new Triangle(canv, 0, -100, 1, false, 5));
-    int current = triangles.size()-1;
-    triangles.get(current).grow();
-  }
-
+  // display all objects
   for (Triangle t : triangles) {
     t.display();
   }
@@ -427,8 +419,8 @@ void triangleZoomStroke(int canv, Indicator range, color col) {
 
 void circleZoom(int canv, Indicator range, color col, int sW, boolean reverse) {
   if (range.beat) {
-    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
-    circles.add(new Circle(canv, 0, 0, 1, colorSwitch, sW));
+    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, strokeweight, color
+    circles.add(new Circle(canv, 0, 0, 1, colorSwitch, sW, cOne));
     int current = circles.size()-1;
     circles.get(current).flipColor();
     if (reverse) {
@@ -443,29 +435,21 @@ void circleZoom(int canv, Indicator range, color col, int sW, boolean reverse) {
   }
 }
 
-
-void rectZoomFill(int canv, Indicator range, color col) {
+void rectZoom(int canv, Indicator range, color col, int sW, boolean reverse) {
   if (range.beat) {
-    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle
-    rectangles.add(new Rectangle(canv, 0, 0, 1, colorSwitch, 0));
-    int current = rectangles.size()-1;
-    rectangles.get(current).flipColor();
-    rectangles.get(current).grow();
+    if (sW == 0) {
+      // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, strokeweight, color
+      rectangles.add(new Rectangle(canv, 0, 0, 1, colorSwitch, 0, cOne));
+      int current = rectangles.size()-1;
+      rectangles.get(current).flipColor();
+      rectangles.get(current).grow();
+    } else {
+      // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, float weight
+      rectangles.add(new Rectangle(canv, 0, 0, 1, false, 5, cOne));
+      int current = rectangles.size()-1;
+      rectangles.get(current).grow();
+    }
   }
-
-  for (Rectangle r : rectangles) {
-    r.display();
-  }
-}
-
-void rectZoomStroke(int canv, Indicator range, color col) {
-  if (range.beat) {
-    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, float weight
-    rectangles.add(new Rectangle(canv, 0, 0, 1, false, 5));
-    int current = rectangles.size()-1;
-    rectangles.get(current).grow();
-  }
-
   for (Rectangle r : rectangles) {
     r.display();
   }

@@ -6,13 +6,14 @@ class Triangle {
   Ani ani;
   float weight;
 
-  Triangle(int canv, float x, float y, float diam, boolean toggle, float weight) {
+  Triangle(int canv, float x, float y, float diam, boolean toggle, float weight, color col) {
     this.canv = canv;
     this.x = x;
     this.y = y;
     this.diam = diam;
     this.toggle = toggle;
     this.weight = weight;
+    this.col = col;
   }
 
   void display() {
@@ -40,10 +41,6 @@ class Triangle {
 
   void flipColor() {
     toggle = !toggle;
-    if (toggle) {
-      col = color(0);
-    } else {
-      col = color(cOne);
-    }
+    if (toggle) col = color(0);
   }
 }

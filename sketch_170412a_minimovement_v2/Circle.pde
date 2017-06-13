@@ -2,17 +2,20 @@ class Circle {
   float x, y, diam;
   int canv;
   color col;
+  int alpha;
   boolean toggle;
-  Ani ani;
+  Ani ani, opacity;
   float weight;
 
-  Circle(int canv, float x, float y, float diam, boolean toggle, float weight) {
+  Circle(int canv, float x, float y, float diam, boolean toggle, float weight, color col) {
     this.canv = canv;
     this.x = x;
     this.y = y;
     this.diam = diam;
     this.toggle = toggle;
     this.weight = weight;
+    this.alpha = 100;
+    this.col = col;
   }
 
   void display() {
@@ -20,7 +23,6 @@ class Circle {
       canvas[canv].fill(col);
       canvas[canv].noStroke();
     } else {
-      col = cOne;
       canvas[canv].stroke(col);
       canvas[canv].strokeWeight(weight);
       canvas[canv].noFill();
@@ -34,11 +36,7 @@ class Circle {
 
   void flipColor() {
     toggle = !toggle;
-    if (toggle) {
-      col = color(0);
-    } else {
-      col = color(cOne);
-    }
+    if (toggle) col = color(0);
   }
 
   void moveInverse() {
