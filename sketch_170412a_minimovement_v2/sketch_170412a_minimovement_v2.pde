@@ -18,7 +18,7 @@ LogGraph log;
 Indicator bassRange;       Indicator midRange;   Indicator trebleRange;
 
 // Indicator settings
-float bassSense = 0.5;     int bassLowT = 1;     int bassHighT = 6;    int bassThresh = 2;
+float bassSense = 0.7;     int bassLowT = 1;     int bassHighT = 6;    int bassThresh = 2;
 float midSense = 0.25;     int midLowT = 8;      int midHighT = 14;    int midThresh = 4;
 float trebleSense = 0.15;  int trebleLowT = 15;  int trebleHighT = 25; int trebleThresh = 4;
 
@@ -191,15 +191,15 @@ void chooseAnimation() {
   } else if (choose[0] == 1) {
     circleZoom(0, bassRange, cOne, 0, false);     // fill
   } else if (choose[0] == 2) {
-    rectZoom(1, midRange, cOne, 0, false);        // fill
-  } else if (choose[0] == 3) {
     rectLines(0, trebleRange, cOne);
-  } else if (choose[0] == 4) {
+  } else if (choose[0] == 3) {
     moveLine(0, bassRange, cOne, weight);
-  } else if (choose[0] == 5) {
+  } else if (choose[0] == 4) {
     particleSystem(0, trebleRange, cOne, "STREAM");
-  } else if (choose[0] == 6) {
+  } else if (choose[0] == 5) {
     particleSystem(0, bassRange, cOne, "EXPLOSION");
+  } else if (choose[0] == 6) {
+    rectZoom(0, midRange, cOne, 0, false);        // fill
   } else if (choose[0] == 7) {
     rectZoom(0, bassRange, cOne, 5, false);       // stroke
   } else if (choose[0] == 8) {
@@ -214,15 +214,15 @@ void chooseAnimation() {
   } else if (choose[1] == 1) {
     circleZoom(1, bassRange, cOne, 0, false);     // fill
   } else if (choose[1] == 2) {
-    rectZoom(1, midRange, cOne, 0, false);        // fill
-  } else if (choose[1] == 3) {
     rectLines(1, midRange, cOne);
-  } else if (choose[1] == 4) {
+  } else if (choose[1] == 3) {
     moveLine(1, bassRange, cOne, weight);
-  } else if (choose[1] == 5) {
+  } else if (choose[1] == 4) {
     particleSystem(1, bassRange, cOne, "STREAM");
-  } else if (choose[1] == 6) {
+  } else if (choose[1] == 5) {
     particleSystem(1, midRange, cOne, "EXPLOSION");
+  } else if (choose[1] == 6) {
+    rectZoom(1, midRange, cOne, 0, false);        // fill
   } else if (choose[1] == 7) {
     rectZoom(1, bassRange, cOne, 5, false);       // stroke
   } else if (choose[1] == 8) {
@@ -235,7 +235,6 @@ void chooseAnimation() {
   if (choose[2] == 0) {
     flashColor(2, trebleRange, cOne);
   } else if (choose[2] == 1) {
-    triangleZoom(2, bassRange, cOne, 0);          // with fill
   } else if (choose[2] == 2) {
     triLines(2, trebleRange, cOne);
   } else if (choose[2] == 3) {
@@ -247,9 +246,12 @@ void chooseAnimation() {
   } else if (choose[2] == 6) {
     triangleZoom(2, trebleRange, cOne, 5);        // with stroke
   } else if (choose[2] == 7) {
-    circleZoom(2, bassRange, cOne, 5, false);     // with stroke
+    triangleZoom(2, bassRange, cOne, 0);          // with fill
   } else if (choose[2] == 8) {
+    circleZoom(2, bassRange, cOne, 5, false);     // with stroke
+  } else if (choose[2] == 9) {
     circleZoom(2, bassRange, cOne, 5, true);      // stroke + reverse
+
   }
 }
 
@@ -326,7 +328,7 @@ void particleSystem(int canv, Indicator range, color col, String type) {
         // Parameters:  PApplet Parent, int canv, floats a, r, color col
         particles.add(new Particle(this, canv, a, 0, cOne));
         int current = particles.size()-1;
-        particles.get(current).moveInverse();
+        particles.get(current).moveReverse();
       }
     } else {
       // error message
@@ -428,7 +430,7 @@ void circleZoom(int canv, Indicator range, color col, int sW, boolean reverse) {
     int current = circles.size()-1;
     circles.get(current).flipColor();
     if (reverse) {
-      circles.get(current).moveInverse();
+      circles.get(current).moveReverse();
     } else {
       circles.get(current).grow();
     }
@@ -449,7 +451,7 @@ void rectZoom(int canv, Indicator range, color col, int sW, boolean reverse) {
       rectangles.get(current).grow();
     } else {
       // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, float weight
-      rectangles.add(new Rectangle(canv, 0, 0, 1, false, 5, cOne));
+      rectangles.add(new Rectangle(canv, 0, 0, 1, false, sW, cOne));
       int current = rectangles.size()-1;
       rectangles.get(current).grow();
     }

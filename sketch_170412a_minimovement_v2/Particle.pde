@@ -28,10 +28,10 @@ class Particle {
   }
 
   void move() {
-    ani = new Ani(this, 6, "r", canvas[canv].width/2+100, Ani.LINEAR);
+    ani = new Ani(this, 3, "r", canvas[canv].width/2+100, Ani.LINEAR);
   }
 
-  void moveInverse() {
+  void moveReverse() {
     r = canvas[canv].width/2+100;
     ani = new Ani(this, 4, "r", 0);
   }

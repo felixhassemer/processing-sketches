@@ -4,7 +4,7 @@ class Circle {
   color col;
   int alpha;
   boolean toggle;
-  Ani ani, opacity;
+  Ani ani;
   float weight;
 
   Circle(int canv, float x, float y, float diam, boolean toggle, float weight, color col) {
@@ -39,7 +39,7 @@ class Circle {
     if (toggle) col = color(0);
   }
 
-  void moveInverse() {
+  void moveReverse() {
     diam = canvas[canv].width+200;
     ani = new Ani(this, 3, "diam", canvas[canv].width-150);
   }

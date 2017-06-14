@@ -35,6 +35,11 @@ class Rectangle {
     ani = new Ani(this, 3, "diam", canvas[canv].width+100);
   }
 
+  void moveReverse() {
+    diam = canvas[canv].width*2;
+    ani = new Ani(this, 3, "diam", 0);
+  }
+
   void flipColor() {
     toggle = !toggle;
     if (toggle) col = color(0);
