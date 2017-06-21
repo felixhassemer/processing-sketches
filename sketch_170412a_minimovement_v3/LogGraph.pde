@@ -13,7 +13,7 @@ class LogGraph {
   // CONSTRUCTOR
   LogGraph(FFT fft, color cGraph, color cBandRange, color cActiveBand) {
     this.fft = fft;
-    this.maxAmp = 100;
+    this.maxAmp = 200;
     this.cGraph = cGraph;
     this.cBandRange = cBandRange;
     this.cActiveBand = cActiveBand;

@@ -29,7 +29,7 @@ class Indicator {
     this.onC = onC;
     this.offC = offC;
     this.beatCount = 30;
-    this.maxAmp = 100;
+    this.maxAmp = 200;
   }
 
   // METHODS

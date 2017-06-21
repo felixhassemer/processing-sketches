@@ -183,18 +183,18 @@ void draw() {
 /////////////////////////////  VISUALS  ///////////////////////////////////
 
 void chooseAnimation() {
-  int functionCount = 9;
-  if (bassRange.beatCount % 16 == 0) {
+  int functionCount = 10;
+  if (bassRange.beatCount % 32 == 0) {
     choose[0] = round(random(functionCount));
     // choose[0] = 9;
     while (choose[1] == choose[0]) {                                // check again until other number
       choose[1] = round(random(functionCount));
     }
     // choose[1] = 9;
-    // while ((choose[2] == choose[0]) || (choose[2] == choose[1])) {  // check again until other number
-    //   choose[2] = round(random(functionCount));
-    // }
-    choose[2] = 2;
+    while ((choose[2] == choose[0]) || (choose[2] == choose[1])) {  // check again until other number
+      choose[2] = round(random(functionCount));
+    }
+    // choose[2] = 7;
   }
 
   //  Animation for CANVAS ZERO
@@ -218,6 +218,8 @@ void chooseAnimation() {
     circleZoom(0, bassRange, cOne, 5, false);     // stroke
   } else if (choose[0] == 9) {
     circleZoom(0, bassRange, cOne, 5, true);      // stroke + reverse
+  } else if (choose[0] == 10) {
+    rectZoom(0, bassRange, cOne, 5, true);        // stroke + reverse
   }
 
   // Animation for CANVAS ONE
@@ -241,12 +243,15 @@ void chooseAnimation() {
     circleZoom(1, bassRange, cOne, 5, false);     // stroke
   } else if (choose[1] == 9) {
     circleZoom(1, bassRange, cOne, 5, true);      // stroke + reverse
+  } else if (choose[0] == 10) {
+    rectZoom(1, midRange, cOne, 5, true);        // stroke + reverse
   }
 
   // Animation for CANVAS TWO
   if (choose[2] == 0) {
     flashColor(2, trebleRange, cOne);
   } else if (choose[2] == 1) {
+    triLines(2, midRange, cOne);
   } else if (choose[2] == 2) {
     triLines(2, bassRange, cOne);
   } else if (choose[2] == 3) {
@@ -256,14 +261,15 @@ void chooseAnimation() {
   } else if (choose[2] == 5) {
     particleSystem(2, midRange, cOne, "EXPLOSION");
   } else if (choose[2] == 6) {
-    triangleZoom(2, trebleRange, cOne, 5);        // with stroke
+    triangleZoom(2, trebleRange, cOne, 5, false);        // with stroke
   } else if (choose[2] == 7) {
-    triangleZoom(2, bassRange, cOne, 0);          // with fill
+    triangleZoom(2, bassRange, cOne, 0, false);          // with fill
   } else if (choose[2] == 8) {
     circleZoom(2, bassRange, cOne, 5, false);     // with stroke
   } else if (choose[2] == 9) {
     circleZoom(2, bassRange, cOne, 5, true);      // stroke + reverse
-
+  } else if (choose[2] == 10) {
+    triangleZoom(2, bassRange, cOne, 5, true);    // stroke + reverse
   }
 }
 
@@ -411,21 +417,25 @@ void rectLines(int canv, Indicator range, color col) {
   }
 }
 
-void triangleZoom(int canv, Indicator range, color col, int sW) {
+void triangleZoom(int canv, Indicator range, color col, int sW, boolean reverse) {
   if (range.beat) {
     if (sW == 0) {
       // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, strokeWeight, color
       // with fill
-      triangles.add(new Triangle(canv, 0, 0, 1, colorSwitch, 0, cOne));
+      triangles.add(new Triangle(canv, 0, -triCenter[1], 1, colorSwitch, 0, cOne));
       int current = triangles.size()-1;
       triangles.get(current).flipColor();
       triangles.get(current).grow();
     } else {
       // Parameters:  int canv, floats x, y, diameter, boolean colortoggle. strokeWeight, color
       // with stroke
-      triangles.add(new Triangle(canv, 0, 0, 1, false, 5, cOne));
+      triangles.add(new Triangle(canv, 0, -triCenter[1], 1, false, 5, cOne));
       int current = triangles.size()-1;
-      triangles.get(current).grow();
+      if (reverse) {
+        triangles.get(current).moveReverse();
+      } else {
+        triangles.get(current).grow();
+      }
     }
   }
 
@@ -437,14 +447,21 @@ void triangleZoom(int canv, Indicator range, color col, int sW) {
 
 void circleZoom(int canv, Indicator range, color col, int sW, boolean reverse) {
   if (range.beat) {
-    // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, strokeweight, color
-    circles.add(new Circle(canv, 0, 0, 1, colorSwitch, sW, cOne));
-    int current = circles.size()-1;
-    circles.get(current).flipColor();
-    if (reverse) {
-      circles.get(current).moveReverse();
-    } else {
+    if (sW == 0) {
+      // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, strokeweight, color
+      circles.add(new Circle(canv, 0, 0, 1, colorSwitch, sW, cOne));
+      int current = circles.size()-1;
+      circles.get(current).flipColor();
       circles.get(current).grow();
+    } else {
+      // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, strokeweight, color
+      circles.add(new Circle(canv, 0, 0, 1, false, sW, cOne));
+      int current = circles.size()-1;
+      if (reverse) {
+        circles.get(current).moveReverse();
+      } else {
+        circles.get(current).grow();
+      }
     }
   }
 
@@ -465,7 +482,11 @@ void rectZoom(int canv, Indicator range, color col, int sW, boolean reverse) {
       // Parameters:  int canv, floats x, y, diameter, boolean colortoggle, float weight
       rectangles.add(new Rectangle(canv, 0, 0, 1, false, sW, cOne));
       int current = rectangles.size()-1;
-      rectangles.get(current).grow();
+      if (reverse) {
+        rectangles.get(current).moveReverse();
+      } else {
+        rectangles.get(current).grow();
+      }
     }
   }
   for (Rectangle r : rectangles) {
