@@ -18,7 +18,7 @@ LogGraph log;
 Indicator bassRange;       Indicator midRange;   Indicator trebleRange;
 
 // Indicator settings
-float bassSense = 0.5;     int bassLowT = 1;     int bassHighT = 6;    int bassThresh = 2;
+float bassSense = 0.80;     int bassLowT = 0;     int bassHighT = 6;    int bassThresh = 2;
 float midSense = 0.25;     int midLowT = 8;      int midHighT = 14;    int midThresh = 4;
 float trebleSense = 0.15;  int trebleLowT = 15;  int trebleHighT = 25; int trebleThresh = 4;
 
