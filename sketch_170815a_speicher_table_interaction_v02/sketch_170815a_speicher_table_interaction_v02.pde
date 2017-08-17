@@ -2,13 +2,15 @@
 import processing.video.*;
 
 ArrayList<Particle> particles;
+ArrayList toRemove;
 
 int cols;
 int rows;
-int scl = 10;
+int scl = 30;
 PVector[] flowField;
+float mag = 0.05;
 
-float incr = 0.001;
+float xincr = 0.1; float yincr = 0.1; float zincr = 0.01;
 float zoff = 0;
 
 
@@ -18,6 +20,7 @@ void setup() {
   background(0);
 
   particles = new ArrayList<Particle>();
+  toRemove = new ArrayList();
 
   cols = floor(width / scl);
   rows = floor(height / scl);
@@ -25,14 +28,19 @@ void setup() {
 }
 
 void draw() {
-  background(0);
-  strokeWeight(1);
-  stroke(255);
+  // background(0);
+  fill(0, 5);
+  noStroke();
+  rect(0, 0, width, height);
+  noFill();
+  stroke(255, 1);
 
   // here goes code for visuals
   for (Particle p : particles) {
     p.display();
     p.update();
+    p.follow(flowField);
+    if ((p.pos.x < 0) || (p.pos.x > width) || (p.pos.y < 0) || (p.pos.y > height)) toRemove.add(p);
   }
 
   float xoff = 0;
@@ -42,25 +50,33 @@ void draw() {
       int index = x + y * cols;
       float angle = noise(xoff, yoff, zoff) * TWO_PI;
       PVector v = PVector.fromAngle(angle);
-      v.setMag(11);
+      v.setMag(mag);
       flowField[index] = v;
 
       // draw the vectors as lines
-      pushMatrix();
-      translate(x*scl, y*scl);
-      rotate(v.heading());
-      line(0, 0, scl, 0);
-      popMatrix();
+      // pushMatrix();
+      // translate(x*scl, y*scl);
+      // rotate(v.heading());
+      // strokeWeight(1);
+      // line(0, 0, scl/2, 0);
+      // popMatrix();
 
-      yoff += incr;
+      yoff += yincr;
     }
-    xoff += incr;
+    xoff += xincr;
   }
-  zoff += incr;
+  zoff += zincr;
+
+  removeObj();
 }
 
-void mousePressed() {
+void mouseDragged() {
   particles.add(new Particle(mouseX, mouseY));
+}
+
+void removeObj() {
+  particles.removeAll(toRemove);
+  // toRemove.clear();
 }
 
 void stop() {
