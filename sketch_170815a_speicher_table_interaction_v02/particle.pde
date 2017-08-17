@@ -1,5 +1,8 @@
 class Particle {
-  PVector pos, vel, acc;
+  PVector pos;
+  PVector vel;
+  PVector acc;
+  float maxSpeed = 2;
 
   Particle(int x, int y) {
     this.pos = new PVector(x, y);
@@ -12,10 +15,11 @@ class Particle {
     point(pos.x, pos.y);
   }
 
-  void move() {
-    vel.limit(6);
+  void update() {
+    vel.limit(maxSpeed);
     vel.add(acc);
     pos.add(vel);
+    acc.mult(0);
   }
 
 }
