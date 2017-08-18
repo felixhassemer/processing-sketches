@@ -22,27 +22,41 @@ void setup() {
   particles = new ArrayList<Particle>();
   toRemove = new ArrayList();
 
-  cols = floor(width / scl);
-  rows = floor(height / scl);
-  flowField = new PVector[(cols*rows)];
+  cols = floor((width+scl) / scl);
+  rows = floor((height+scl) / scl);
+  flowField = new PVector[(cols * rows)];
+
+
 }
 
 void draw() {
   // background(0);
   fill(0, 5);
-  noStroke();
   rect(0, 0, width, height);
+  noStroke();
   noFill();
-  stroke(255, 1);
+  stroke(255);
 
   // here goes code for visuals
+
+  setFlowField();
+  particleFunctions();
+
+  removeObj();
+}
+
+void particleFunctions() {
   for (Particle p : particles) {
     p.display();
     p.update();
     p.follow(flowField);
+    
+    // add objects that have reached edge to removal ArrayList
     if ((p.pos.x < 0) || (p.pos.x > width) || (p.pos.y < 0) || (p.pos.y > height)) toRemove.add(p);
   }
+}
 
+void setFlowField() {
   float xoff = 0;
   for (int x = 0; x < cols; x++) {
     float yoff = 0;
@@ -66,17 +80,18 @@ void draw() {
     xoff += xincr;
   }
   zoff += zincr;
-
-  removeObj();
 }
+
 
 void mouseDragged() {
   particles.add(new Particle(mouseX, mouseY));
 }
 
+
 void removeObj() {
   particles.removeAll(toRemove);
-  // toRemove.clear();
+
+  toRemove.clear();
 }
 
 void stop() {

@@ -12,7 +12,7 @@ class Particle {
 
   void display() {
     stroke(255);
-    strokeWeight(1);
+    strokeWeight(2);
     point(pos.x, pos.y);
   }
 
