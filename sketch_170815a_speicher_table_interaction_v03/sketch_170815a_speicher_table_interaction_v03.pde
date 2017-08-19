@@ -1,19 +1,21 @@
 // IMPORT libraries
 import processing.video.*;
 import spout.*;
+import ddf.minim.*;
+import ddf.minim.analysis.*;
 
 // VARIABLES
 Spout sender;
+Minim minim;    AudioInput source;    FFT fft;    WindowFunction windowFunction = FFT.HANN;
 
 // ArrayLists
 ArrayList<Particle> particles;
 ArrayList toRemove;
 
 // flowfield
-int cols;
-int rows;
-int scl = 30;
 PVector[] flowField;
+int cols;       int rows;
+int scl = 30;
 float mag = 0.05;
 boolean showVectors = false;
 
@@ -22,14 +24,17 @@ float xincr = 0.1; float yincr = 0.1; float zincr = 0.01;
 float zoff = 0;
 
 
-
+// --   SETUP    ---------------------------------------------------------------
 void setup() {
   size(1280, 960, P2D);
   background(0);
 
   // init Spout
-  sender = new Spout(this);
-  sender.createSender("Spout Processing");
+  // sender = new Spout(this);
+  // sender.createSender("Spout Processing");
+
+  // init Minim
+  initMinim();
 
   // init arraylists for objects and deletion
   particles = new ArrayList<Particle>();
@@ -41,6 +46,8 @@ void setup() {
   flowField = new PVector[(cols * rows)];
 }
 
+
+// --   DRAW    ----------------------------------------------------------------
 void draw() {
   fill(0, 5);
   rect(0, 0, width, height);
@@ -48,15 +55,23 @@ void draw() {
   noFill();
   stroke(255);
 
+  // ***************************************************************************
   // here goes code for visuals
-
   setFlowField(); // initialize and update the flowField + noise
   particleFunctions(); // execute all object functions on the particles
 
+
+
+
+  // ***************************************************************************
+  // execute misc core functions
   removeObj();  // delete all the objects that have finished animating
   sender.sendTexture();
 }
 
+
+
+// --   VISUALS   --------------------------------------------------------------
 void particleFunctions() {
   for (Particle p : particles) {
     p.update();
@@ -98,18 +113,28 @@ void setFlowField() {
   zoff += zincr;
 }
 
-
+// --   CORE FUNCTIONS   -------------------------------------------------------
 void mouseDragged() {
   particles.add(new Particle(mouseX, mouseY));
 }
 
+void initMinim() {
+  minim = new Minim(this);
+  source = minim.getLineIn(Minim.STEREO, 1024);
+  fft = new FFT(source.bufferSize(), source.sampleRate()/2);
+  fft.logAverages(32, 12);
+  fft.window(windowFunction);
+}
 
 void removeObj() {
+  // all arraylists for removal of objects
   particles.removeAll(toRemove);
 
   if (toRemove.size() > 1000) toRemove.clear(); // clear arraylist after 1000 objects
 }
 
 void stop() {
+  source.close();
+  minim.stop();
   super.stop();
 }
