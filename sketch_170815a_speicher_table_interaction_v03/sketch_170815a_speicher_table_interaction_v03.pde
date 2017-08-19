@@ -5,8 +5,9 @@ import ddf.minim.*;
 import ddf.minim.analysis.*;
 
 // VARIABLES
-Spout sender;
+Spout sender;   boolean sendFrames = false;
 Minim minim;    AudioInput source;    FFT fft;    WindowFunction windowFunction = FFT.HANN;
+SoundProcessor processor;
 
 // ArrayLists
 ArrayList<Particle> particles;
@@ -23,6 +24,9 @@ boolean showVectors = false;
 float xincr = 0.1; float yincr = 0.1; float zincr = 0.01;
 float zoff = 0;
 
+// audio
+float sensitivity = 0.2;
+
 
 // --   SETUP    ---------------------------------------------------------------
 void setup() {
@@ -30,48 +34,57 @@ void setup() {
   background(0);
 
   // init Spout
-  // sender = new Spout(this);
-  // sender.createSender("Spout Processing");
+  if (sendFrames) {
+    sender = new Spout(this);
+    sender.createSender("Spout Processing");
+  }
 
   // init Minim
   initMinim();
+  processor = new SoundProcessor(fft, source);
 
   // init arraylists for objects and deletion
   particles = new ArrayList<Particle>();
   toRemove = new ArrayList();
 
-  // calculate the number of cols and rows + some tolerance
-  cols = floor((width+scl) / scl);
-  rows = floor((height+scl) / scl);
-  flowField = new PVector[(cols * rows)];
+  initFlowField(); // set up rows, columns and flowfield array
 }
 
 
 // --   DRAW    ----------------------------------------------------------------
 void draw() {
-  fill(0, 5);
-  rect(0, 0, width, height);
-  noStroke();
-  noFill();
+  background(0);
   stroke(255);
+  noFill();
+  // fill(0, 5);
+  // noStroke();
+  // rect(0, 0, width, height);
+  // noFill();
+  // stroke(255);
+
+  // ***************************************************************************
+  // here goes code for audioprocessing
+  fft.forward(source.mix);
+  fftFunctions();
+
 
   // ***************************************************************************
   // here goes code for visuals
-  setFlowField(); // initialize and update the flowField + noise
-  particleFunctions(); // execute all object functions on the particles
-
-
+  // setFlowField(); // initialize and update the flowField + noise
+  // particleFunctions(); // execute all object functions on the particles
 
 
   // ***************************************************************************
-  // execute misc core functions
+  // execute misc functions
   removeObj();  // delete all the objects that have finished animating
-  sender.sendTexture();
+  if (sendFrames) sender.sendTexture(); // send out each frame to resolume
 }
 
 
 
 // --   VISUALS   --------------------------------------------------------------
+
+
 void particleFunctions() {
   for (Particle p : particles) {
     p.update();
@@ -81,6 +94,13 @@ void particleFunctions() {
     // add objects that have reached edge to removal ArrayList
     if ((p.pos.x < 0) || (p.pos.x > width) || (p.pos.y < 0) || (p.pos.y > height)) toRemove.add(p);
   }
+}
+
+void initFlowField() {
+  // calculate the number of cols and rows + some tolerance
+  cols = floor((width+scl) / scl);
+  rows = floor((height+scl) / scl);
+  flowField = new PVector[(cols * rows)];
 }
 
 void setFlowField() {
@@ -113,9 +133,19 @@ void setFlowField() {
   zoff += zincr;
 }
 
+
+// --   AUDIO FUNCTIONS   ------------------------------------------------------
+
+void fftFunctions() {
+  processor.fillArray();
+  processor.normalizeArray();
+  processor.setMax();
+}
+
 // --   CORE FUNCTIONS   -------------------------------------------------------
+
 void mouseDragged() {
-  particles.add(new Particle(mouseX, mouseY));
+  // particles.add(new Particle(mouseX, mouseY));
 }
 
 void initMinim() {
