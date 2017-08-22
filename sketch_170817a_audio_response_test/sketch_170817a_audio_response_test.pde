@@ -26,23 +26,27 @@ void draw() {
   noFill();
 
 
- // draw the waveforms
- for(int i = 0; i < source.bufferSize() - 1; i++) {
-   line( i, height/3 + source.mix.get(i)*100, i+1, height/3 + source.mix.get(i+1)*100 );
- }
+  float sW = map(source.mix.level(), 0, 1, 3, 50);
+  strokeWeight(sW);
+  float scl = map(source.mix.level(), 0, 1, 100, 300);
+  // draw the waveforms
+  for(int i = 0; i < source.bufferSize()/6 - 1; i++) {
+    float x = map(i, 0, source.bufferSize()/6-1, 0, width);
+    line( x, height/3 + source.mix.get(i)*scl, x+1, height/3 + source.mix.get(i+1)*scl );
+  }
 
- // draw the FFT
- fft.forward(source.mix);
- for (int i = 0; i < fft.specSize(); i++) {
-   float x = map(i, 0, fft.specSize()/2, 0, width);
-   line(x, 2*height/3, x, 2*height/3 - fft.getBand(i));
- }
+   // draw the FFT
+   fft.forward(source.mix);
+   for (int i = 0; i < fft.specSize(); i++) {
+     float x = map(i, 0, fft.specSize()/2, 0, width);
+     line(x, 2*height/3, x, 2*height/3 - fft.getBand(i));
+   }
 
-for (int i = 0; i < fft.avgSize(); i++) {
-  float x = map(i, 0, fft.avgSize(), 0, width);
-  float w = width / fft.avgSize();
-  rect(x, height, w, -fft.getAvg(i));
-}
+  for (int i = 0; i < fft.avgSize(); i++) {
+    float x = map(i, 0, fft.avgSize(), 0, width);
+    float w = width / fft.avgSize();
+    rect(x, height, w, -fft.getAvg(i));
+  }
 
 }
 

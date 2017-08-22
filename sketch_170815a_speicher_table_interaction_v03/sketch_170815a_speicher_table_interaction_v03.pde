@@ -3,11 +3,13 @@ import processing.video.*;
 import spout.*;
 import ddf.minim.*;
 import ddf.minim.analysis.*;
+import de.looksgood.ani.*;
 
 // VARIABLES
 Spout sender;   boolean sendFrames = false;
 Minim minim;    AudioInput source;    FFT fft;    WindowFunction windowFunction = FFT.HANN;
 SoundProcessor processor;
+AniSequence recLine; int[][] points = { {0, 0}, {0, 100}, {100, 100}, {100, 0} };
 
 // ArrayLists
 ArrayList<Particle> particles;
@@ -43,11 +45,25 @@ void setup() {
   initMinim();
   processor = new SoundProcessor(fft, source);
 
+  // init Ani
+  Ani.init(this);
+
   // init arraylists for objects and deletion
   particles = new ArrayList<Particle>();
   toRemove = new ArrayList();
 
   initFlowField(); // set up rows, columns and flowfield array
+
+
+  recLine = new AniSequence(this);
+  recLine.beginSequence();
+
+  recLine.add(Ani.to(this, 1, ""));
+  recLine.add(Ani.to(this, 1, ""));
+  recLine.add(Ani.to(this, 1, ""));
+  recLine.add(Ani.to(this, 1, ""));
+
+  recLine.endSequence();
 }
 
 
@@ -67,6 +83,8 @@ void draw() {
   fft.forward(source.mix);
   fftFunctions();
 
+  listenPhase(100);
+  listenAnimation();
 
   // ***************************************************************************
   // here goes code for visuals
@@ -78,6 +96,7 @@ void draw() {
   // execute misc functions
   removeObj();  // delete all the objects that have finished animating
   if (sendFrames) sender.sendTexture(); // send out each frame to resolume
+  showFrameRate(20, 40, 32);  // (x, y, size)
 }
 
 
@@ -136,6 +155,29 @@ void setFlowField() {
 
 // --   AUDIO FUNCTIONS   ------------------------------------------------------
 
+void listenPhase(int scale) {
+  stroke(255);
+  strokeWeight(3);
+  for (int i=0; i < source.bufferSize() - 1; i++) {
+    float x = map(i, 0, source.bufferSize(), 0, width);
+    line(x, height/2 + source.mix.get(i) * scale, x + 1, height/2 + source.mix.get(i + 1) * scale);
+  }
+
+
+}
+
+void listenAnimation() {
+  // recLine = new Ani(this, 2, "x", width);
+  strokeWeight(10);
+  beginShape();
+  vertex(0, height);
+  vertex(width, height);
+  vertex(width, 0);
+  vertex(0, 0);
+  vertex(0, height);
+  endShape();
+}
+
 void fftFunctions() {
   processor.fillArray();
   processor.normalizeArray();
@@ -144,8 +186,13 @@ void fftFunctions() {
 
 // --   CORE FUNCTIONS   -------------------------------------------------------
 
+void showFrameRate(int x, int y, int size) {
+  textSize(size);
+  text(frameRate, x, y);
+}
+
 void mouseDragged() {
-  // particles.add(new Particle(mouseX, mouseY));
+  particles.add(new Particle(mouseX, mouseY));
 }
 
 void initMinim() {
