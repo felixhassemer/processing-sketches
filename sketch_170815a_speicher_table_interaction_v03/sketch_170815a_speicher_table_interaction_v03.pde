@@ -1,15 +1,15 @@
 // IMPORT libraries
-import processing.video.*;
 import spout.*;
 import ddf.minim.*;
 import ddf.minim.analysis.*;
 import de.looksgood.ani.*;
+import de.looksgood.ani.easing.*;
 
 // VARIABLES
 Spout sender;   boolean sendFrames = false;
 Minim minim;    AudioInput source;    FFT fft;    WindowFunction windowFunction = FFT.HANN;
 SoundProcessor processor;
-AniSequence recLine; int[][] points = { {0, 0}, {0, 100}, {100, 100}, {100, 0} };
+RecordLine progressBar;
 
 // ArrayLists
 ArrayList<Particle> particles;
@@ -52,18 +52,9 @@ void setup() {
   particles = new ArrayList<Particle>();
   toRemove = new ArrayList();
 
+  progressBar = new RecordLine(this);
+
   initFlowField(); // set up rows, columns and flowfield array
-
-
-  recLine = new AniSequence(this);
-  recLine.beginSequence();
-
-  recLine.add(Ani.to(this, 1, ""));
-  recLine.add(Ani.to(this, 1, ""));
-  recLine.add(Ani.to(this, 1, ""));
-  recLine.add(Ani.to(this, 1, ""));
-
-  recLine.endSequence();
 }
 
 
@@ -72,11 +63,8 @@ void draw() {
   background(0);
   stroke(255);
   noFill();
-  // fill(0, 5);
-  // noStroke();
-  // rect(0, 0, width, height);
-  // noFill();
-  // stroke(255);
+
+  progressBar.display();
 
   // ***************************************************************************
   // here goes code for audioprocessing
@@ -167,15 +155,7 @@ void listenPhase(int scale) {
 }
 
 void listenAnimation() {
-  // recLine = new Ani(this, 2, "x", width);
-  strokeWeight(10);
-  beginShape();
-  vertex(0, height);
-  vertex(width, height);
-  vertex(width, 0);
-  vertex(0, 0);
-  vertex(0, height);
-  endShape();
+
 }
 
 void fftFunctions() {
@@ -189,6 +169,10 @@ void fftFunctions() {
 void showFrameRate(int x, int y, int size) {
   textSize(size);
   text(frameRate, x, y);
+}
+
+void mousePressed() {
+  progressBar.move();
 }
 
 void mouseDragged() {
