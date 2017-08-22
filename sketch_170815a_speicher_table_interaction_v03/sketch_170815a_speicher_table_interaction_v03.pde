@@ -5,11 +5,19 @@ import ddf.minim.analysis.*;
 import de.looksgood.ani.*;
 import de.looksgood.ani.easing.*;
 
-// VARIABLES
+// VARIABLES *****************************************************
 Spout sender;   boolean sendFrames = false;
 Minim minim;    AudioInput source;    FFT fft;    WindowFunction windowFunction = FFT.HANN;
 SoundProcessor processor;
+
+// record progressbar
 RecordLine progressBar;
+int[][] points = { {0, 0}, {0, 960}, {1280, 960}, {1280, 0} };
+
+// input and output phase timing
+int phaseTime = 8000;
+int phaseStart;
+boolean phaseSwitch = false;
 
 // ArrayLists
 ArrayList<Particle> particles;
@@ -52,7 +60,7 @@ void setup() {
   particles = new ArrayList<Particle>();
   toRemove = new ArrayList();
 
-  progressBar = new RecordLine(this);
+  progressBar = new RecordLine(this, points);
 
   initFlowField(); // set up rows, columns and flowfield array
 }
@@ -64,15 +72,25 @@ void draw() {
   stroke(255);
   noFill();
 
-  progressBar.display();
+  progressBar.display(255, 3); // (color c, int strokeweight)
 
   // ***************************************************************************
   // here goes code for audioprocessing
   fft.forward(source.mix);
   fftFunctions();
 
-  listenPhase(100);
-  listenAnimation();
+  // if (!phaseSwitch) {
+  //   phaseSwitch = true;
+  //   phaseStart = millis();
+  // }
+  //
+  // if (millis() - phaseStart >= phaseTime) {
+  //   phaseSwitch = false;
+  // }
+  //
+  // if (phaseSwitch) {
+  //   listenPhase(100); // (int scale)
+  // }
 
   // ***************************************************************************
   // here goes code for visuals
@@ -88,9 +106,7 @@ void draw() {
 }
 
 
-
 // --   VISUALS   --------------------------------------------------------------
-
 
 void particleFunctions() {
   for (Particle p : particles) {
@@ -140,7 +156,6 @@ void setFlowField() {
   zoff += zincr;
 }
 
-
 // --   AUDIO FUNCTIONS   ------------------------------------------------------
 
 void listenPhase(int scale) {
@@ -150,13 +165,8 @@ void listenPhase(int scale) {
     float x = map(i, 0, source.bufferSize(), 0, width);
     line(x, height/2 + source.mix.get(i) * scale, x + 1, height/2 + source.mix.get(i + 1) * scale);
   }
-
-
 }
 
-void listenAnimation() {
-
-}
 
 void fftFunctions() {
   processor.fillArray();

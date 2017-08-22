@@ -11,31 +11,20 @@ class RecordLine {
 
 
 
-  RecordLine(PApplet parent, PVector[] pts) {
+  RecordLine(PApplet parent, int[][] p) {
     this.seq = new AniSequence(parent);
-    this.pts[0] = new PVector(0, 0);
-    this.pts[1] = new PVector(0, 100);
-    this.pts[2] = new PVector(100, 100);
-    this.pts[3] = new PVector(100, 0);
-    this.current = new PVector(0, 0);
-    this.target = pts[1];
+    this.pts[0] = new PVector(p[0][0], p[0][1]);
+    this.pts[1] = new PVector(p[1][0], p[1][1]);
+    this.pts[2] = new PVector(p[2][0], p[2][1]);
+    this.pts[3] = new PVector(p[3][0], p[3][1]);
+    this.current = new PVector(p[0][0], p[0][1]);
+    this.target = this.pts[1];
 
   }
 
-  void display() {
-    stroke(255);
-    strokeWeight(3);
-    translate(50, 50);
-
-    // line(pt[0][0], pt[0][1], //p1
-    //     pt[1][0], pt[1][1]); //p2
-    // line(pt[1][0], pt[1][1], //p2
-    //     pt[2][0], pt[2][1]); //p3
-    // line(pt[2][0], pt[2][1], //p3
-    //     pt[3][0], pt[3][1]); //p4
-    // line(pt[3][0], pt[3][1], //p4
-    //     pt[0][0], pt[0][1]); //p1
-    println(current);
+  void display(color c, int sW) {
+    stroke(c);
+    strokeWeight(sW);
 
     ellipse(current.x, current.y, 20, 20);
   }

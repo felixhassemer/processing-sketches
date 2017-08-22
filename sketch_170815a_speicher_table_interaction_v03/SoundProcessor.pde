@@ -37,8 +37,4 @@ class SoundProcessor {
       maxAmp = max(amps);
     }
   }
-
-  // void invertFft() {
-  //
-  // }
 }
