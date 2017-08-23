@@ -32,7 +32,7 @@ PVector[] flowField;
 int cols;       int rows;
 int scl = 30;
 float mag = 0.05;
-boolean showVectors = true;
+boolean showVectors = false;
 
 // flowfield NOISE
 float xincr = 0.1; float yincr = 0.1; float zincr = 0.01;
@@ -78,15 +78,15 @@ void setup() {
 
 // --   DRAW    ----------------------------------------------------------------
 void draw() {
-  // background(0);
-  // stroke(255);
-  // noFill();
-  fill(0, 5);
-  rect(0, 0, width, height);
-  noFill();
+  background(0);
   stroke(255);
+  noFill();
+  // fill(0, 5);
+  // rect(0, 0, width, height);
+  // noFill();
+  // stroke(255);
 
-  progressBar.display(255, 3); // (color c, int strokeweight)
+  // progressBar.display(255, 3); // (color c, int strokeweight)
 
   // ***************************************************************************
   // here goes code for audioprocessing
@@ -186,7 +186,7 @@ void fftFunctions() {
 
 void oscOut() {
   OscMessage msg = new OscMessage("/test");
-  msg.add(400);
+  msg.add(mouseX / 40);
 
   osc.send(msg, sc);
 }
@@ -203,9 +203,9 @@ void mousePressed() {
   oscOut();
 }
 
-void mouseDragged() {
-  particles.add(new Particle(mouseX, mouseY));
-}
+// void mouseDragged() {
+//   particles.add(new Particle(mouseX, mouseY));
+// }
 
 void initMinim() {
   minim = new Minim(this);
