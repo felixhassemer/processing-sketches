@@ -26,7 +26,7 @@ class RecordLine {
     stroke(c);
     strokeWeight(sW);
 
-    ellipse(current.x, current.y, 20, 20);
+    // ellipse(current.x, current.y, 20, 20);
   }
 
   void move() {

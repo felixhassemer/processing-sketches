@@ -4,20 +4,24 @@ import ddf.minim.*;
 import ddf.minim.analysis.*;
 import de.looksgood.ani.*;
 import de.looksgood.ani.easing.*;
+import oscP5.*;
+import netP5.*;
+
+
 
 // VARIABLES *****************************************************
 Spout sender;   boolean sendFrames = false;
 Minim minim;    AudioInput source;    FFT fft;    WindowFunction windowFunction = FFT.HANN;
 SoundProcessor processor;
+boolean listening = false;
+
+// SUPERCOLLIDER COMMUNICATION
+OscP5 osc;
+NetAddress sc;
 
 // record progressbar
 RecordLine progressBar;
 int[][] points = { {0, 0}, {0, 960}, {1280, 960}, {1280, 0} };
-
-// input and output phase timing
-int phaseTime = 8000;
-int phaseStart;
-boolean phaseSwitch = false;
 
 // ArrayLists
 ArrayList<Particle> particles;
@@ -28,7 +32,7 @@ PVector[] flowField;
 int cols;       int rows;
 int scl = 30;
 float mag = 0.05;
-boolean showVectors = false;
+boolean showVectors = true;
 
 // flowfield NOISE
 float xincr = 0.1; float yincr = 0.1; float zincr = 0.01;
@@ -50,8 +54,14 @@ void setup() {
   }
 
   // init Minim
-  initMinim();
-  processor = new SoundProcessor(fft, source);
+  if (listening) {
+    initMinim();
+    processor = new SoundProcessor(fft, source);
+  }
+
+  // init OSC and SUPERCOLLIDER
+  osc = new OscP5(this, 12000);
+  sc = new NetAddress("127.0.0.1", 57120);
 
   // init Ani
   Ani.init(this);
@@ -68,34 +78,28 @@ void setup() {
 
 // --   DRAW    ----------------------------------------------------------------
 void draw() {
-  background(0);
-  stroke(255);
+  // background(0);
+  // stroke(255);
+  // noFill();
+  fill(0, 5);
+  rect(0, 0, width, height);
   noFill();
+  stroke(255);
 
   progressBar.display(255, 3); // (color c, int strokeweight)
 
   // ***************************************************************************
   // here goes code for audioprocessing
-  fft.forward(source.mix);
-  fftFunctions();
+  if (listening) {
+    fft.forward(source.mix);
+    fftFunctions();
+  }
 
-  // if (!phaseSwitch) {
-  //   phaseSwitch = true;
-  //   phaseStart = millis();
-  // }
-  //
-  // if (millis() - phaseStart >= phaseTime) {
-  //   phaseSwitch = false;
-  // }
-  //
-  // if (phaseSwitch) {
-  //   listenPhase(100); // (int scale)
-  // }
 
   // ***************************************************************************
   // here goes code for visuals
-  // setFlowField(); // initialize and update the flowField + noise
-  // particleFunctions(); // execute all object functions on the particles
+  setFlowField(); // initialize and update the flowField + noise
+  particleFunctions(); // execute all object functions on the particles
 
 
   // ***************************************************************************
@@ -103,6 +107,10 @@ void draw() {
   removeObj();  // delete all the objects that have finished animating
   if (sendFrames) sender.sendTexture(); // send out each frame to resolume
   showFrameRate(20, 40, 32);  // (x, y, size)
+
+  // Open Sound Control
+  // oscOut();
+
 }
 
 
@@ -174,6 +182,15 @@ void fftFunctions() {
   processor.setMax();
 }
 
+// --   OSC FUNCTIONS   ------------------------------------------------------
+
+void oscOut() {
+  OscMessage msg = new OscMessage("/test");
+  msg.add(400);
+
+  osc.send(msg, sc);
+}
+
 // --   CORE FUNCTIONS   -------------------------------------------------------
 
 void showFrameRate(int x, int y, int size) {
@@ -182,7 +199,8 @@ void showFrameRate(int x, int y, int size) {
 }
 
 void mousePressed() {
-  progressBar.move();
+  // progressBar.move();
+  oscOut();
 }
 
 void mouseDragged() {
