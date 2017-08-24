@@ -17,7 +17,7 @@ boolean listening = false;
 
 // SUPERCOLLIDER COMMUNICATION
 OscP5 osc;
-NetAddress sc;
+NetAddress sc, ls;
 
 // record progressbar
 RecordLine progressBar;
@@ -62,6 +62,7 @@ void setup() {
   // init OSC and SUPERCOLLIDER
   osc = new OscP5(this, 12000);
   sc = new NetAddress("127.0.0.1", 57120);
+  ls = new NetAddress("127.0.0.1", 12000);
 
   // init Ani
   Ani.init(this);
@@ -186,9 +187,18 @@ void fftFunctions() {
 
 void oscOut() {
   OscMessage msg = new OscMessage("/test");
-  msg.add(mouseX / 40);
+  int chooseSmp = round(map(mouseX, 0, width, 1, 13));
+  msg.add(chooseSmp);
 
   osc.send(msg, sc);
+  msg.clear();
+}
+
+void oscEvent(OscMessage theOscMessage) {
+  /* print the address pattern and the typetag of the received OscMessage */
+  print("### received an osc message.");
+  print(" addrpattern: "+theOscMessage.addrPattern());
+  println(" typetag: "+theOscMessage.typetag());
 }
 
 // --   CORE FUNCTIONS   -------------------------------------------------------
@@ -203,9 +213,9 @@ void mousePressed() {
   oscOut();
 }
 
-// void mouseDragged() {
-//   particles.add(new Particle(mouseX, mouseY));
-// }
+void mouseDragged() {
+  // particles.add(new Particle(mouseX, mouseY));
+}
 
 void initMinim() {
   minim = new Minim(this);
