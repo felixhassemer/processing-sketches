@@ -15,6 +15,10 @@ Minim minim;    AudioInput source;    FFT fft;    WindowFunction windowFunction 
 SoundProcessor processor;
 boolean listening = false;
 
+// samples
+int sampNum = 35;   // total number of loaded samples
+int toneRange = 12; // in semitones
+
 // SUPERCOLLIDER COMMUNICATION
 OscP5 osc;
 NetAddress sc, ls;
@@ -40,6 +44,7 @@ float zoff = 0;
 
 // audio
 float sensitivity = 0.2;
+
 
 
 // --   SETUP    ---------------------------------------------------------------
@@ -77,15 +82,12 @@ void setup() {
 }
 
 
+
 // --   DRAW    ----------------------------------------------------------------
 void draw() {
   background(0);
   stroke(255);
   noFill();
-  // fill(0, 5);
-  // rect(0, 0, width, height);
-  // noFill();
-  // stroke(255);
 
   // progressBar.display(255, 3); // (color c, int strokeweight)
 
@@ -110,13 +112,13 @@ void draw() {
   showFrameRate(20, 40, 32);  // (x, y, size)
 
   // Open Sound Control
+  displayZones();
   // oscOut();
-
 }
 
 
-// --   VISUALS   --------------------------------------------------------------
 
+// --   VISUALS   --------------------------------------------------------------
 void particleFunctions() {
   for (Particle p : particles) {
     p.update();
@@ -176,7 +178,6 @@ void listenPhase(int scale) {
   }
 }
 
-
 void fftFunctions() {
   processor.fillArray();
   processor.normalizeArray();
@@ -185,20 +186,29 @@ void fftFunctions() {
 
 // --   OSC FUNCTIONS   ------------------------------------------------------
 
+void displayZones() {
+  stroke(255);
+  strokeWeight(1);
+  // distances are not correct yet - need to work on this
+  for (int i = 1; i <= sampNum +1; i++) {
+    float x = width / sampNum;
+    line(x*i, 0, x*i, height);
+  }
+}
+
 void oscOut() {
   OscMessage msg = new OscMessage("/test");
-  int chooseSmp = round(map(mouseX, 0, width, 1, 13));
+  int chooseSmp = round(map(mouseX, 0, width, 0, sampNum));
+  int rate = round(map(mouseY, 0, height, -12, 12));
+  // int randSmp = round(random(sampNum) - 1);
   msg.add(chooseSmp);
+  msg.add(rate);
 
   osc.send(msg, sc);
   msg.clear();
 }
 
 void oscEvent(OscMessage theOscMessage) {
-  /* print the address pattern and the typetag of the received OscMessage */
-  print("### received an osc message.");
-  print(" addrpattern: "+theOscMessage.addrPattern());
-  println(" typetag: "+theOscMessage.typetag());
 }
 
 // --   CORE FUNCTIONS   -------------------------------------------------------
@@ -215,6 +225,7 @@ void mousePressed() {
 
 void mouseDragged() {
   // particles.add(new Particle(mouseX, mouseY));
+  // oscOut();
 }
 
 void initMinim() {

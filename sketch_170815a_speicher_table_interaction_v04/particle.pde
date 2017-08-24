@@ -32,8 +32,7 @@ class Particle {
     int y = floor(pos.y / scl);
 
     int index = x + y * cols;
-    // println("particle index: " + index);
-    // println("flowfield array length: " + vectors.length);
+
     // check if index is out of bounds
     if (index > vectors.length) index = vectors.length - 1;
     else if (index < 0) index = 0;
