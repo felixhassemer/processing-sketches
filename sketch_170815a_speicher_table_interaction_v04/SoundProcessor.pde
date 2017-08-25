@@ -1,6 +1,8 @@
 class SoundProcessor {
   float level = 0;
   float maxAmp = 200;
+  int detectFreq = 800;
+  int maxIndex = 0;
   float[] amps;
   float[] normAmps;
   FFT fft;
@@ -31,10 +33,21 @@ class SoundProcessor {
   }
 
   void setMax() {
-    if (maxAmp > max(amps)) {
-      maxAmp -= 0.1;
-    } else {
-      maxAmp = max(amps);
+    for (int i=0; i < amps.length; i++) {
+      if (amps[i] > maxAmp) {
+        maxAmp = amps[i];
+        maxIndex = i;
+      } else {
+        maxAmp -= 0.1;
+        maxAmp = constrain(maxAmp, 0, 200);
+      }
     }
+  }
+
+  float getMaxFreq() {
+    float maxAmpFreq;
+    maxAmpFreq = fft.getAverageCenterFrequency(maxIndex);
+    maxAmpFreq = constrain(maxAmpFreq, 1, detectFreq);
+    return maxAmpFreq;
   }
 }
