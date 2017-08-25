@@ -12,12 +12,12 @@ import netP5.*;
 // VARIABLES *****************************************************
 Spout sender;   boolean sendFrames = false;
 Minim minim;    AudioInput source;    FFT fft;    WindowFunction windowFunction = FFT.HANN;
-SoundProcessor processor;
-boolean listening = false;
+SoundProcessor sp;
+boolean listening = true;
 
 // samples
 int sampNum = 35;   // total number of loaded samples
-int toneRange = 12; // in semitones
+int toneRange = 24; // in semitones
 
 // SUPERCOLLIDER COMMUNICATION
 OscP5 osc;
@@ -42,9 +42,6 @@ boolean showVectors = false;
 float xincr = 0.1; float yincr = 0.1; float zincr = 0.01;
 float zoff = 0;
 
-// audio
-float sensitivity = 0.2;
-
 
 
 // --   SETUP    ---------------------------------------------------------------
@@ -61,7 +58,7 @@ void setup() {
   // init Minim
   if (listening) {
     initMinim();
-    processor = new SoundProcessor(fft, source);
+    sp = new SoundProcessor(fft, source);
   }
 
   // init OSC and SUPERCOLLIDER
@@ -101,8 +98,8 @@ void draw() {
 
   // ***************************************************************************
   // here goes code for visuals
-  setFlowField(); // initialize and update the flowField + noise
-  particleFunctions(); // execute all object functions on the particles
+  // setFlowField(); // initialize and update the flowField + noise
+  // particleFunctions(); // execute all object functions on the particles
 
 
   // ***************************************************************************
@@ -113,7 +110,9 @@ void draw() {
 
   // Open Sound Control
   displayZones();
-  // oscOut();
+
+
+  if (sp.maxAmp > 50) oscOut();
 }
 
 
@@ -179,9 +178,10 @@ void listenPhase(int scale) {
 }
 
 void fftFunctions() {
-  processor.fillArray();
-  processor.normalizeArray();
-  processor.setMax();
+  sp.fillArray();
+  sp.normalizeArray();
+  sp.setMax();
+  // println(sp.getMaxFreq());
 }
 
 // --   OSC FUNCTIONS   ------------------------------------------------------
@@ -189,21 +189,25 @@ void fftFunctions() {
 void displayZones() {
   stroke(255);
   strokeWeight(1);
-  // distances are not correct yet - need to work on this
-  for (int i = 1; i <= sampNum +1; i++) {
-    float x = width / sampNum;
+  for (int i = 1; i <= sampNum; i++) {
+    float x = (width / float(sampNum));
     line(x*i, 0, x*i, height);
   }
 }
 
 void oscOut() {
-  OscMessage msg = new OscMessage("/test");
+  OscMessage msg = new OscMessage("/oscmsg");
   int chooseSmp = round(map(mouseX, 0, width, 0, sampNum));
-  int rate = round(map(mouseY, 0, height, -12, 12));
+  // int rate = round(map(mouseY, 0, height, -12, 12));
   // int randSmp = round(random(sampNum) - 1);
   msg.add(chooseSmp);
-  msg.add(rate);
+  // msg.add(rate);
 
+  if (frameCount % 2 == 0) {
+    float freq = sp.getMaxFreq();
+    if (freq < sp.detectFreq) msg.add(freq);
+
+  }
   osc.send(msg, sc);
   msg.clear();
 }
@@ -220,7 +224,7 @@ void showFrameRate(int x, int y, int size) {
 
 void mousePressed() {
   // progressBar.move();
-  oscOut();
+  // oscOut();
 }
 
 void mouseDragged() {
