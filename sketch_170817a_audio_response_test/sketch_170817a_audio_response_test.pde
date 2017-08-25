@@ -25,9 +25,9 @@ void draw() {
   stroke(255);
   noFill();
 
-
-  float sW = map(source.mix.level(), 0, 1, 3, 50);
-  strokeWeight(sW);
+  //
+  // float sW = map(source.mix.level(), 0, 1, 3, 50);
+  // strokeWeight(sW);
   float scl = map(source.mix.level(), 0, 1, 100, 300);
   // draw the waveforms
   for(int i = 0; i < source.bufferSize()/6 - 1; i++) {
