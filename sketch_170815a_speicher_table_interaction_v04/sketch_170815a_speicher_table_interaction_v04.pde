@@ -19,13 +19,19 @@ boolean listening = true;
 int sampNum = 35;   // total number of loaded samples
 int toneRange = 24; // in semitones
 
+
 // SUPERCOLLIDER COMMUNICATION
 OscP5 osc;
 NetAddress sc, ls;
 
-// record progressbar
+// record phase
 RecordLine progressBar;
 int[][] points = { {0, 0}, {0, 960}, {1280, 960}, {1280, 0} };
+int recStart, outStart, time;
+int dur = 2000;
+boolean recPhase = false; boolean recFin = true;
+boolean outPhase = true;  boolean outFin = false;
+
 
 // ArrayLists
 ArrayList<Particle> particles;
@@ -95,6 +101,49 @@ void draw() {
     fftFunctions();
   }
 
+  // timing the phases
+  // get current time
+  time = millis();
+
+  // // if current time - starting time is greater than duration, recFin = true, else false
+  // recFin = (time - recStart >= dur) ? true : false;
+  // outFin = (time - outStart >= dur) ? true : false;
+  // // if recording is finished, assign false to recording
+  // recPhase = recFin ? false : true;
+  // outPhase = outFin ? false : true;
+  //
+  // // start recording if not recording
+  // if (!recPhase && outFin) {
+  //   recStart = time;
+  //   recPhase = true;
+  //   println("in");
+  // } else if (!outPhase && recFin) {
+  //   outStart = time;
+  //   outPhase = true;
+  //   println("out");
+  //
+  // }
+  //
+  // if (recPhase) {
+  //   listenPhase(100);
+  //
+  // } else if (outPhase) {
+  //   // something something
+  // }
+
+
+
+  // if (frameCount % 120 == 0) {
+  //   println(recStart, time, dur);
+  //   println("finished :" + recFin);
+  //   println("recording :" + rec);
+  // }
+  // if (time - recStart >= dur) {
+  //   recFin = true;
+  // }
+  //
+  // if (recFin) rec = false;
+
 
   // ***************************************************************************
   // here goes code for visuals
@@ -109,10 +158,12 @@ void draw() {
   showFrameRate(20, 40, 32);  // (x, y, size)
 
   // Open Sound Control
-  displayZones();
+  // displayZones();
 
 
-  if (sp.maxAmp > 50) oscOut();
+  oscOut();
+  showMaxFreq();
+
 }
 
 
@@ -177,11 +228,16 @@ void listenPhase(int scale) {
   }
 }
 
+void showMaxFreq() {
+  stroke(255);
+  strokeWeight(3);
+  rect(0, 0, sp.getMaxFreq(), 30);
+}
+
 void fftFunctions() {
   sp.fillArray();
   sp.normalizeArray();
   sp.setMax();
-  // println(sp.getMaxFreq());
 }
 
 // --   OSC FUNCTIONS   ------------------------------------------------------
@@ -197,23 +253,18 @@ void displayZones() {
 
 void oscOut() {
   OscMessage msg = new OscMessage("/oscmsg");
-  int chooseSmp = round(map(mouseX, 0, width, 0, sampNum));
-  // int rate = round(map(mouseY, 0, height, -12, 12));
-  // int randSmp = round(random(sampNum) - 1);
-  msg.add(chooseSmp);
-  // msg.add(rate);
+  float amp = source.mix.level();
+  float freq = sp.getMaxFreq();
 
-  if (frameCount % 2 == 0) {
-    float freq = sp.getMaxFreq();
-    if (freq < sp.detectFreq) msg.add(freq);
+  if (amp > 0.1) freq = 1;
+  // println(freq, amp);
 
-  }
+  msg.add(freq);
+  msg.add(amp);
   osc.send(msg, sc);
   msg.clear();
 }
 
-void oscEvent(OscMessage theOscMessage) {
-}
 
 // --   CORE FUNCTIONS   -------------------------------------------------------
 
