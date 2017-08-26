@@ -1,19 +1,16 @@
 // IMPORT libraries
-import spout.*;
 import ddf.minim.*;
 import ddf.minim.analysis.*;
 import oscP5.*;
 import netP5.*;
 
 // VARIABLES *****************************************************
-Spout sender;   boolean sendFrames = false;
 Minim minim;    AudioInput source;    FFT fft;    WindowFunction windowFunction = FFT.HANN;
 SoundProcessor sp;
 boolean listening = true;
 
 // samples
 int sampNum = 35;   // total number of loaded samples
-int toneRange = 24; // in semitones
 
 // SUPERCOLLIDER COMMUNICATION
 OscP5 osc;
@@ -25,17 +22,12 @@ NetAddress sc, ls;
 void setup() {
   size(1280, 960, P2D);
   background(0);
-
-  // init Spout
-  if (sendFrames) {
-    sender = new Spout(this);
-    sender.createSender("Spout Processing");
-  }
+  frameRate(30);
 
   // init Minim
   if (listening) {
     initMinim();
-    sp = new SoundProcessor(fft, source, 6, 800); // (fft, source, int smoothing, int maxDetectFrequency)
+    sp = new SoundProcessor(fft, source, 3, 800); // (fft, source, int smoothing, int maxDetectFrequency)
   }
 
   // init OSC and SUPERCOLLIDER
@@ -58,12 +50,9 @@ void draw() {
     fftFunctions();
   }
 
-
   // ***************************************************************************
   // execute misc functions
-  if (sendFrames) sender.sendTexture(); // send out each frame to resolume
-  showFrameRate(20, 40, 32);  // (x, y, size)
-  showMaxFreq(20, 120, 32); // (x, y, size)
+  showUI(20, 40, 32, 50); // (int x, int y, int txtSize, int distance)
 
   // Open Sound Control
   oscOut();
@@ -71,20 +60,6 @@ void draw() {
 
 
 // --   AUDIO FUNCTIONS   ------------------------------------------------------
-
-void waveGraph(int scale) {
-  stroke(255);
-  strokeWeight(3);
-  for (int i=0; i < source.bufferSize() - 1; i++) {
-    float x = map(i, 0, source.bufferSize(), 0, width);
-    line(x, height/2 + source.mix.get(i) * scale, x + 1, height/2 + source.mix.get(i + 1) * scale);
-  }
-}
-
-void showMaxFreq(int x, int y, int size) {
-  textSize(size);
-  text(sp.getMaxFreq(), x, y);
-}
 
 void fftFunctions() {
   sp.fillArray();
@@ -109,9 +84,13 @@ void oscOut() {
 
 // --   CORE FUNCTIONS   -------------------------------------------------------
 
-void showFrameRate(int x, int y, int size) {
+void showUI(int x, int y, int size, int distance) {
   textSize(size);
   text(frameRate, x, y);
+  text("Freq: " + sp.smFreq, x, y + distance);
+  text("Amp: " + sp.smAmp, x, y + distance * 2);
+  text("max Detect: " + sp.detectFreq, x, y + distance * 3);
+  text("Smoothing: " + sp.smoothing, x, y + distance * 4);
 }
 
 void initMinim() {
