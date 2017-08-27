@@ -46,6 +46,20 @@ class SoundProcessor {
     }
   }
 
+  // void smoothData() {
+  //   float[] tempLevels
+  //   levels[index] = source.mix.level();
+  //   frequencies[index] = getMaxFreq();
+  //
+  //   if (index == smoothing-1) {
+  //     for (int i=0; i < levels.length; i++) {
+  //
+  //     }
+  //   } else {
+  //     index ++;
+  //   }
+  // }
+
   void fillArray() {
     for (int i=0; i < fft.avgSize(); i++) {
       amps[i] = fft.getAvg(i);
