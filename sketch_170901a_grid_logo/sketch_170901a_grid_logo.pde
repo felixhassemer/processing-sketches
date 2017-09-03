@@ -1,11 +1,12 @@
 
 // GLOBAL VARS
+// 14 rows - 10 cols
 int rows = 14;
 int cols = 10;
 
 int gCount = 3;
 int gXoff = 4;
-int gYoff = 6;
+int gYoff = 4;
 
 // 3D Array to save color information
 int[][][] g = new int[gCount][cols][rows];
@@ -28,7 +29,6 @@ void setup() {
   fillGrid();
   mirrorGrid();
   showGrid();
-
 }
 
 void draw() {}
@@ -48,11 +48,11 @@ void initGrid() {
 }
 
 void fillGrid() {
-  // fill grid with random numbers as color switches
+  // fill half grid with random numbers as color switches
   for (int gNum = 0; gNum < gCount; gNum++) {
     for (int i = 0; i < cols/2; i++) {
       for (int j = 0; j < rows; j++) {
-        g[gNum][i][j] = int(random(4));
+        g[gNum][i][j] = int(random(2));
       }
     }
   }
@@ -64,33 +64,46 @@ void mirrorGrid() {
 
   for (int gNum = 0; gNum < gCount; gNum++) {
     // mirror i var to go through array backwards
-    int mi = cols / 2;
+    int mi = cols / 2; // has to be reset after every grid so it doesn't become negative
 
     for (int i = 0; i < cols / 2; i++) {
       // mirror j var to go through array backwards
-      int mj = rows;
+      int mj = rows;  // has to be reset after every column so it doesn't become negative
       mi--;
-      // println("i, mi: " + i + " ," + mi);
 
       for (int j = 0; j < rows; j++) {
         mj--;
-        // println("j, mj: " + j + " ," + mj);
         gRev[gNum][mi][mj] = g[gNum][i][j];
       }
     }
   }
 
-  // for (int gNum = 0; gNum < gCount; gNum++) {
-  //   for (int i = 0; i < cols; i++) {
-  //     println(i + cols/2);
-  //     for (int j = 0; j < rows; j++) {
-  //       // g[gNum][i][j] = gRev[gNum][i][j];
-  //     }
-  //   }
-  // }
+  // append reversed array to grid array
+  for (int gNum = 0; gNum < gCount; gNum++) {
+    for (int i = 0; i < cols/2; i++) {
+      for (int j = 0; j < rows; j++) {
+        g[gNum][i + cols/2][j] = gRev[gNum][i][j];
+      }
+    }
+  }
 }
 
-
+// void showGrid() {
+//   float[] xoff = new float[gCount - 1];
+//   float[] yoff = new float[gCount - 1];
+//   for (int gNum = 0; gNum < gCount; gNum++) {
+//     if (gNum != 0) {
+//       xoff[gNum] =
+//     }
+//     for (int i = 0; i < cols; i++) {
+//       for (int j = 0; j < rows; j++) {
+//         if (g[gNum][i][j] == 1) fill(0);
+//         else fill(255);
+//         rect(i * gW[gNum][0], j * gH[gNum][1], gW[gNum][0], gH[gNum][1]);
+//       }
+//     }
+//   }
+// }
 
 void showGrid() {
   // draw grid 0
