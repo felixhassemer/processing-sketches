@@ -11,6 +11,10 @@ int gCount = 3;
 int gXoff = 12;
 int gYoff = 6;
 
+// noise
+float nzOff = 0;
+float[] nIncr = {0.4, 0.2, 0.001};  // noise incr: xoff, yoff, zoff
+
 // 3D Array to save color information
 int[][][] g = new int[gCount][cols][rows];
 
@@ -28,12 +32,14 @@ void setup() {
 
   // grid functions
   initGrid();
+
+}
+
+void draw() {
   fillGrid();
   mirrorGrid();
   showGrid();
 }
-
-void draw() {}
 
 void initGrid() {
   // // grid w and h for each grid
@@ -72,13 +78,39 @@ float calcSize(int gSelect, int whSelect) {
 
 void fillGrid() {
   // fill half grid with random numbers as color switches
+  // for (int gNum = 0; gNum < gCount; gNum++) {
+  //   for (int i = 0; i < cols/2; i++) {
+  //     for (int j = 0; j < rows; j++) {
+  //       g[gNum][i][j] = int(random(4));
+  //     }
+  //   }
+  // }
+
+  // fill half grid with noise values
+  float nxOff = 0;
   for (int gNum = 0; gNum < gCount; gNum++) {
     for (int i = 0; i < cols/2; i++) {
+      float nyOff = 0;
       for (int j = 0; j < rows; j++) {
-        g[gNum][i][j] = int(random(4));
+        float n = noise(nxOff, nyOff, nzOff);
+
+        if (n > 0.5) {
+          n = 1;
+        } else {
+          n = 0;
+        }
+
+        g[gNum][i][j] = int(n);
+
+        nyOff += nIncr[0];
       }
+      nxOff += nIncr[1];
     }
+    nzOff += nIncr[2];
   }
+
+
+
 }
 
 void mirrorGrid() {
