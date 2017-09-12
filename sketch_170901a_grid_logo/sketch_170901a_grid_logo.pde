@@ -1,19 +1,20 @@
 
 // GLOBAL VARS
 // 14 rows - 10 cols
-int rows = 16;
-int cols = 22;
+int rows = 12;
+int cols = 16;
 
 // total number of grids - can't be changed yet
 int gCount = 3;
 
 // offset of grid spaces on each side * 2
-int gXoff = 12;
+int gXoff = 8;
 int gYoff = 6;
+boolean showLines = true;
 
 // noise
 float nzOff = 0;
-float[] nIncr = {0.4, 0.2, 0.001};  // noise incr: xoff, yoff, zoff
+float[] nIncr = {0.6, 0.1, 0.001};  // noise incr: xoff, yoff, zoff
 
 // 3D Array to save color information
 int[][][] g = new int[gCount][cols][rows];
@@ -21,21 +22,28 @@ int[][][] g = new int[gCount][cols][rows];
 // 2D Array for grid width and height
 float[][] gSize = new float[gCount][2]; // [number of grid][width, height]
 
+// colors
+color bgndC = color(255);
+color fillC = color(0);
+color strokeC = color(0);
+
 
 void setup() {
   // DIN Seitenverhältnis 7:10
-  size(1920, 1000);
+  size(1000, 700);
   background(255);
-  // noStroke();
-  stroke(0);
+
+  if (showLines) stroke(strokeC);
+  else noStroke();
+
   strokeWeight(0.5);
 
   // grid functions
   initGrid();
-
 }
 
 void draw() {
+  background(bgndC);
   fillGrid();
   mirrorGrid();
   showGrid();
@@ -93,14 +101,15 @@ void fillGrid() {
       float nyOff = 0;
       for (int j = 0; j < rows; j++) {
         float n = noise(nxOff, nyOff, nzOff);
+        int c = 0;
 
         if (n > 0.5) {
-          n = 1;
+          c = 1;
         } else {
-          n = 0;
+          c = 0;
         }
 
-        g[gNum][i][j] = int(n);
+        g[gNum][i][j] = c;
 
         nyOff += nIncr[0];
       }
@@ -108,9 +117,6 @@ void fillGrid() {
     }
     nzOff += nIncr[2];
   }
-
-
-
 }
 
 void mirrorGrid() {
@@ -164,14 +170,18 @@ void showGrid() {
     // display all grids
     for (int i = 0; i < cols; i++) {
       for (int j = 0; j < rows; j++) {
-        if (g[gNum][i][j] == 1) fill(0);
-        else fill(255);
+        if (g[gNum][i][j] == 1) {
+          fill(fillC);
+          if (showLines) stroke(strokeC);
+        } else {
+          fill(bgndC);
+          if (showLines) stroke(strokeC);
+        }
+
+        if (!showLines) noStroke();
+
         rect(i * gSize[gNum][0] + xoff[gNum], j * gSize[gNum][1] + yoff[gNum], gSize[gNum][0], gSize[gNum][1]);
       }
     }
   }
-}
-
-void mousePressed() {
-  setup();
 }
