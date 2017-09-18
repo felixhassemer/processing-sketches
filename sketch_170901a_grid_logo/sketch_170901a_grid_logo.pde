@@ -1,20 +1,20 @@
 
 // GLOBAL VARS
 // 14 rows - 10 cols
-int rows = 12;
-int cols = 16;
+int rows = 8;
+int cols = 12;
 
 // total number of grids - can't be changed yet
 int gCount = 3;
 
 // offset of grid spaces on each side * 2
-int gXoff = 8;
-int gYoff = 6;
-boolean showLines = true;
+int gXoff = 2;
+int gYoff = 4;
+boolean showLines = false;
 
 // noise
 float nzOff = 0;
-float[] nIncr = {0.6, 0.1, 0.001};  // noise incr: xoff, yoff, zoff
+float[] nIncr = {0.6, 0.1, 0.0005};  // noise incr: xoff, yoff, zoff
 
 // 3D Array to save color information
 int[][][] g = new int[gCount][cols][rows];
@@ -26,11 +26,12 @@ float[][] gSize = new float[gCount][2]; // [number of grid][width, height]
 color bgndC = color(255);
 color fillC = color(0);
 color strokeC = color(0);
+color gAccent = color(170, 55, 65);
 
 
 void setup() {
   // DIN Seitenverhältnis 7:10
-  size(1000, 700);
+  size(500, 350);
   background(255);
 
   if (showLines) stroke(strokeC);
@@ -167,15 +168,21 @@ void showGrid() {
       yoff[gNum] = calcSize(gNum, 1) * gYoff/2;
     }
 
+    // change color for specific grid numbers
+    if (gNum == 1) {fillC = gAccent; strokeC = gAccent;}
+    else {fillC = color(0, 0, 0); strokeC = fillC;}
+
     // display all grids
     for (int i = 0; i < cols; i++) {
       for (int j = 0; j < rows; j++) {
         if (g[gNum][i][j] == 1) {
           fill(fillC);
           if (showLines) stroke(strokeC);
+          else stroke(fillC);
         } else {
           fill(bgndC);
           if (showLines) stroke(strokeC);
+          else stroke(bgndC);
         }
 
         if (!showLines) noStroke();
