@@ -1,20 +1,20 @@
 
 // GLOBAL VARS
 // 14 rows - 10 cols
-int rows = 8;
-int cols = 12;
+int rows = 10;
+int cols = 10;
 
 // total number of grids - can't be changed yet
-int gCount = 3;
+int gCount = 6;
 
 // offset of grid spaces on each side * 2
-int gXoff = 2;
+int gXoff = 4;
 int gYoff = 4;
 boolean showLines = false;
 
 // noise
 float nzOff = 0;
-float[] nIncr = {0.6, 0.1, 0.0005};  // noise incr: xoff, yoff, zoff
+float[] nIncr = {0.6, 0.2, 0.001};  // noise incr: xoff, yoff, zoff
 
 // 3D Array to save color information
 int[][][] g = new int[gCount][cols][rows];
@@ -27,16 +27,14 @@ color bgndC = color(255);
 color fillC = color(0);
 color strokeC = color(0);
 color gAccent = color(170, 55, 65);
+int gridAccent = 0;
 
 
 void setup() {
   // DIN Seitenverhältnis 7:10
   size(500, 350);
-  background(255);
-
-  if (showLines) stroke(strokeC);
-  else noStroke();
-
+  // fullScreen();
+  background(bgndC);
   strokeWeight(0.5);
 
   // grid functions
@@ -52,9 +50,9 @@ void draw() {
 
 void initGrid() {
   // // grid w and h for each grid
-  for (int gNum = 0; gNum < gCount; gNum++) {
-    gSize[gNum][0] = (float(width) - (calcSize(gNum, 0) * gXoff)) / cols;
-    gSize[gNum][1] = (float(height) - (calcSize(gNum, 1) * gYoff)) / rows;
+  for (int num = 0; num < gCount; num++) {
+    gSize[num][0] = (float(width) - (calcSize(num, 0) * gXoff)) / cols;
+    gSize[num][1] = (float(height) - (calcSize(num, 1) * gYoff)) / rows;
   }
 }
 
@@ -62,14 +60,14 @@ float calcSize(int gSelect, int whSelect) {
   float[][] gSizeSum = new float[gCount][2]; // stores width[0] and height[1] of cells
 
   // if gridnumber is higher than 0, add up offsets for each grid
-  for (int gNum = 0; gNum < gCount; gNum++) {
-    if (gNum > 0) {
-      for (int i = 0; i < gNum; i++) {
+  for (int num = 0; num < gCount; num++) {
+    if (num > 0) {
+      for (int i = 0; i < num; i++) {
         // add everything to the sum (0 = w, 1 = h)
-        gSizeSum[gNum][whSelect] += gSize[i][whSelect];
+        gSizeSum[num][whSelect] += gSize[i][whSelect];
       }
     } else {
-      gSizeSum[gNum][whSelect] = 0;
+      gSizeSum[num][whSelect] = 0;
     }
   }
 
@@ -87,17 +85,17 @@ float calcSize(int gSelect, int whSelect) {
 
 void fillGrid() {
   // fill half grid with random numbers as color switches
-  // for (int gNum = 0; gNum < gCount; gNum++) {
+  // for (int num = 0; num < gCount; num++) {
   //   for (int i = 0; i < cols/2; i++) {
   //     for (int j = 0; j < rows; j++) {
-  //       g[gNum][i][j] = int(random(4));
+  //       g[num][i][j] = int(random(4));
   //     }
   //   }
   // }
 
   // fill half grid with noise values
   float nxOff = 0;
-  for (int gNum = 0; gNum < gCount; gNum++) {
+  for (int num = 0; num < gCount; num++) {
     for (int i = 0; i < cols/2; i++) {
       float nyOff = 0;
       for (int j = 0; j < rows; j++) {
@@ -110,7 +108,7 @@ void fillGrid() {
           c = 0;
         }
 
-        g[gNum][i][j] = c;
+        g[num][i][j] = c;
 
         nyOff += nIncr[0];
       }
@@ -124,7 +122,7 @@ void mirrorGrid() {
   int[][][] gRev = new int[gCount][cols][rows];
 
 
-  for (int gNum = 0; gNum < gCount; gNum++) {
+  for (int num = 0; num < gCount; num++) {
     // mirror i var to go througSize array backwards
     int mi = cols / 2; // has to be reset after every grid so it doesn't become negative
 
@@ -135,16 +133,16 @@ void mirrorGrid() {
 
       for (int j = 0; j < rows; j++) {
         mj--;
-        gRev[gNum][mi][mj] = g[gNum][i][j];
+        gRev[num][mi][mj] = g[num][i][j];
       }
     }
   }
 
   // append reversed array to grid array
-  for (int gNum = 0; gNum < gCount; gNum++) {
+  for (int num = 0; num < gCount; num++) {
     for (int i = 0; i < cols/2; i++) {
       for (int j = 0; j < rows; j++) {
-        g[gNum][i + cols/2][j] = gRev[gNum][i][j];
+        g[num][i + cols/2][j] = gRev[num][i][j];
       }
     }
   }
@@ -156,38 +154,37 @@ void showGrid() {
   float[] yoff = new float[gCount];
 
   // iterate over all grids
-  for (int gNum = 0; gNum < gCount; gNum++) {
+  for (int num = 0; num < gCount; num++) {
     // sum up the offsets from previous grids
     // float[] gSizeSum = new float[2]; // stores width[0] and height[1] of cells
     xoff[0] = 0;
     yoff[0] = 0;
 
-    if (gNum > 0) {
-      // add the sum and multiply by number of cell offset / 2
-      xoff[gNum] = calcSize(gNum, 0) * gXoff/2;
-      yoff[gNum] = calcSize(gNum, 1) * gYoff/2;
-    }
+    // color selected grid with accent color
+    color tempFill;
+    if (num == gridAccent) tempFill = gAccent;
+    else tempFill = fillC;
 
-    // change color for specific grid numbers
-    if (gNum == 1) {fillC = gAccent; strokeC = gAccent;}
-    else {fillC = color(0, 0, 0); strokeC = fillC;}
+    if (num > 0) {
+      // add the sum and multiply by number of cell offset / 2
+      xoff[num] = calcSize(num, 0) * gXoff/2;
+      yoff[num] = calcSize(num, 1) * gYoff/2;
+    }
 
     // display all grids
     for (int i = 0; i < cols; i++) {
       for (int j = 0; j < rows; j++) {
-        if (g[gNum][i][j] == 1) {
-          fill(fillC);
-          if (showLines) stroke(strokeC);
-          else stroke(fillC);
+        if (g[num][i][j] == 1) {
+          fill(tempFill);
+          if (showLines) stroke(bgndC);
+          else stroke(tempFill);
         } else {
           fill(bgndC);
-          if (showLines) stroke(strokeC);
+          if (showLines) stroke(tempFill);
           else stroke(bgndC);
         }
 
-        if (!showLines) noStroke();
-
-        rect(i * gSize[gNum][0] + xoff[gNum], j * gSize[gNum][1] + yoff[gNum], gSize[gNum][0], gSize[gNum][1]);
+        rect(i * gSize[num][0] + xoff[num], j * gSize[num][1] + yoff[num], gSize[num][0], gSize[num][1]);
       }
     }
   }
